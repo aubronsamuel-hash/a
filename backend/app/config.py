@@ -33,5 +33,9 @@ class Settings:
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
     DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "10"))
 
+    # Observabilite
+    REQUEST_ID_HEADER: str = os.getenv("REQUEST_ID_HEADER", "X-Request-ID")
+    LOG_JSON: bool = os.getenv("LOG_JSON", "true").lower() == "true"
+
 
 settings = Settings()
