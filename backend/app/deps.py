@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from fastapi import Query
+from fastapi import Header, HTTPException, Query, status
 
 from .config import settings
+from .security import decode_access_token
 
 
 def pagination_params(
@@ -15,3 +16,11 @@ def pagination_params(
     ),
 ):
     return {"page": page, "page_size": page_size}
+
+
+def get_current_user(authorization: str | None = Header(default=None)) -> dict[str, str]:
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token manquant")
+    token = authorization.split(" ", 1)[1]
+    data = decode_access_token(token)
+    return {"username": data.sub}
