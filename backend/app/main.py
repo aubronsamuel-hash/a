@@ -30,10 +30,19 @@ def _auto_seed_admin() -> None:
     if not settings.ADMIN_AUTOSEED:
         return
     with session_scope() as db:
-        if get_by_username(db, settings.ADMIN_USERNAME):
+        u = get_by_username(db, settings.ADMIN_USERNAME)
+        if u:
+            if u.role != "admin":
+                u.role = "admin"
+                db.add(u)
             return
         try:
-            create_user(db, settings.ADMIN_USERNAME, hash_password(settings.ADMIN_PASSWORD))
+            create_user(
+                db,
+                settings.ADMIN_USERNAME,
+                hash_password(settings.ADMIN_PASSWORD),
+                role="admin",
+            )
             logging.info("Admin autoseed cree: %s", settings.ADMIN_USERNAME)
         except IntegrityError:
             db.rollback()

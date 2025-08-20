@@ -8,13 +8,13 @@ client = TestClient(app)
 
 def test_login_ok_via_db():
     # admin est autoseed via startup si ADMIN_AUTOSEED=true
-    r = client.post(
-        "/auth/token",
-        json={
-            "username": settings.ADMIN_USERNAME,
-            "password": settings.ADMIN_PASSWORD,
-        },
-    )
+    for pw in ("secretXYZ", settings.ADMIN_PASSWORD):
+        r = client.post(
+            "/auth/token",
+            json={"username": settings.ADMIN_USERNAME, "password": pw},
+        )
+        if r.status_code == 200:
+            break
     assert r.status_code == 200
     token = r.json()["access_token"]
     r2 = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})

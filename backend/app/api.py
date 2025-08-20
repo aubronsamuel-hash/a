@@ -15,7 +15,7 @@ class HealthModel(BaseModel):
 
 @router.get("/healthz", response_model=HealthModel, tags=["health"])
 def healthz():
-    return {"status": "ok", "version": "0.5.0"}
+    return {"status": "ok", "version": "0.6.0"}
 
 
 class EchoIn(BaseModel):
@@ -35,8 +35,9 @@ def echo(payload: EchoIn, pg=Depends(pagination_params)):  # noqa: B008
 
 class MeOut(BaseModel):
     username: str
+    role: str
 
 
 @router.get("/auth/me", response_model=MeOut, tags=["auth"])
-def me(current=Depends(get_current_user)):  # noqa: B008
-    return {"username": current["username"]}
+def me(current=Depends(get_current_user)) -> MeOut:  # noqa: B008
+    return MeOut(username=current["username"], role=current["role"])

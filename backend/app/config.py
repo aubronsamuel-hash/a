@@ -20,14 +20,14 @@ class Settings:
     JWT_SECRET: str = os.getenv("JWT_SECRET", "changeme-dev")
     JWT_ALGO: str = os.getenv("JWT_ALGO", "HS256")
     JWT_TTL_SECONDS: int = int(os.getenv("JWT_TTL_SECONDS", "3600"))
+    REFRESH_JWT_SECRET: str = os.getenv("REFRESH_JWT_SECRET", "changeme-refresh-dev")
+    REFRESH_JWT_TTL_SECONDS: int = int(os.getenv("REFRESH_JWT_TTL_SECONDS", "1209600"))
     CORS_ORIGINS: list[str] = _split_csv(os.getenv("CORS_ORIGINS", ""))
 
-    # Admin autoseed
     ADMIN_AUTOSEED: bool = os.getenv("ADMIN_AUTOSEED", "true").lower() == "true"
     ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin123")
 
-    # DB
     DB_DSN: str = os.getenv("DB_DSN", "sqlite:///./cc.db")
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))

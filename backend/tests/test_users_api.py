@@ -7,10 +7,16 @@ client = TestClient(app)
 
 
 def _token() -> str:
+    # try new password first (may have been changed in other tests)
     r = client.post(
         "/auth/token",
-        json={"username": settings.ADMIN_USERNAME, "password": settings.ADMIN_PASSWORD},
+        json={"username": settings.ADMIN_USERNAME, "password": "secretXYZ"},
     )
+    if r.status_code != 200:
+        r = client.post(
+            "/auth/token",
+            json={"username": settings.ADMIN_USERNAME, "password": settings.ADMIN_PASSWORD},
+        )
     assert r.status_code == 200
     return r.json()["access_token"]
 

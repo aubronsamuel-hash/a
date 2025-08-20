@@ -6,15 +6,16 @@ from app.main import app
 client = TestClient(app)
 
 
-def _get_token(username: str, password: str) -> str | None:
-    r = client.post("/auth/token", json={"username": username, "password": password})
-    if r.status_code == 200:
-        return r.json()["access_token"]
+def _get_token(username: str) -> str | None:
+    for pw in ("secretXYZ", settings.ADMIN_PASSWORD):
+        r = client.post("/auth/token", json={"username": username, "password": pw})
+        if r.status_code == 200:
+            return r.json()["access_token"]
     return None
 
 
 def test_login_ok_and_me() -> None:
-    token = _get_token(settings.ADMIN_USERNAME, settings.ADMIN_PASSWORD)
+    token = _get_token(settings.ADMIN_USERNAME)
     assert token is not None
     r = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
     assert r.status_code == 200
