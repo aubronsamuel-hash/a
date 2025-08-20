@@ -23,17 +23,50 @@ jobs:
           ruff backend
           mypy backend
       - name: Tests
+        env:
+          DEV_USER: admin
+          DEV_PASSWORD: admin123
         run: |
           pytest -q --cov=backend
-  compose_smoke:
-    runs-on: ubuntu-latest
+  windows_smoke:
+    runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Build and run compose
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install (venv)
+        shell: pwsh
         run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install -U pip
+          .\.venv\Scripts\pip.exe install -e backend[dev]
+      - name: Start API (bg)
+        shell: pwsh
+        run: |
+          ./PS1/run_bg.ps1
+      - name: Smoke auth (PowerShell)
+        shell: pwsh
+        env:
+          DEV_USER: admin
+          DEV_PASSWORD: admin123
+        run: |
+          ./PS1/smoke_auth.ps1
+  compose_smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run compose (si Docker dispo)
+        run: |
+          if ! command -v docker >/dev/null 2>&1; then
+            echo "Docker non disponible sur ce runner, on saute ce job."
+            exit 0
+          fi
           docker compose up -d --build
           sleep 5
-          set +e
           code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/healthz)
           echo "HTTP=$code"
           test "$code" = "200"

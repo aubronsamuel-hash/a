@@ -1,19 +1,24 @@
-# Coulisses Crew API (ETAPE 1)
+# Coulisses Crew API (ETAPE 2)
 
-Windows-first. Voir dossiers PS1/ pour scripts.
+Auth JWT minimale de dev.
 
-## Local (sans Docker)
+## Local Windows
 
-* PS1/setup.ps1 : cree venv, installe deps
-* PS1/run.ps1 : lance l API
-* PS1/test.ps1 : tests unitaires + HTTP
-* PS1/lint.ps1 : ruff + mypy
+PS1\setup.ps1
 
-## Docker
+PS1\run.ps1 (foreground) ou PS1\run_bg.ps1 (background)
 
-* PS1/compose_up.ps1 / compose_down.ps1
+PS1\smoke_auth.ps1
 
-## Endpoints
+## Local Linux/macOS
 
-* GET /healthz
-* POST /echo
+scripts/bash/setup.sh
+
+scripts/bash/run.sh (background)
+
+scripts/bash/smoke_auth.sh
+
+## Docker (si installe)
+
+PS1\compose_up.ps1 / compose_down.ps1
+
