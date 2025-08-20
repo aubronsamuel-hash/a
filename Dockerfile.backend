@@ -3,11 +3,13 @@ FROM python:3.11-slim
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 
-COPY backend/pyproject.toml /app/backend/pyproject.toml
+# Copier d'abord tout le backend pour permettre l'install editable
+COPY backend /app/backend
+
+# Installer dependances (mode editable)
 RUN pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -e /app/backend[dev]
 
-COPY backend /app/backend
-
 EXPOSE 8001
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "2"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "2", "--app-dir", "backend"]
+
