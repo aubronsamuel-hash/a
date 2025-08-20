@@ -74,6 +74,14 @@ DB_DSN=sqlite:///./cc.db
       - name: Smoke auth (API)
         shell: pwsh
         run: ./PS1/smoke_auth.ps1
+      - name: Smoke users ETag (API)
+        shell: bash
+        run: |
+          if command -v pwsh >/dev/null 2>&1; then
+            pwsh -File PS1/web_users_smoke.ps1
+          else
+            powershell.exe -File PS1/web_users_smoke.ps1
+          fi
   compose_smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 12
@@ -149,12 +157,13 @@ DB_DSN=sqlite:///./cc.db
       - name: Install deps
         working-directory: web
         run: npm ci
-      - name: Lint
-        working-directory: web
-        run: npm run lint
-      - name: Test
-        working-directory: web
-        run: npm test
+      - name: Lint and test (PowerShell)
+        run: |
+          if command -v pwsh >/dev/null 2>&1; then
+            pwsh -File PS1/web_test.ps1
+          else
+            powershell.exe -File PS1/web_test.ps1
+          fi
       - name: Build
         working-directory: web
         env:
