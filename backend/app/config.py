@@ -1,0 +1,28 @@
+from __future__ import annotations
+
+import os
+
+
+def _split_csv(value: str) -> list[str]:
+    return [v.strip() for v in value.split(",") if v.strip()]
+
+
+class Settings:
+    APP_NAME: str = os.getenv("APP_NAME", "Coulisses Crew API")
+    APP_ENV: str = os.getenv("APP_ENV", "dev")
+    APP_HOST: str = os.getenv("APP_HOST", "0.0.0.0")
+    APP_PORT: int = int(os.getenv("APP_PORT", "8001"))
+    APP_LOG_LEVEL: str = os.getenv("APP_LOG_LEVEL", "info")
+    APP_DEFAULT_PAGE_SIZE: int = int(os.getenv("APP_DEFAULT_PAGE_SIZE", "50"))
+    APP_MAX_PAGE_SIZE: int = int(os.getenv("APP_MAX_PAGE_SIZE", "200"))
+    APP_REQUEST_TIMEOUT_SECONDS: int = int(os.getenv("APP_REQUEST_TIMEOUT_SECONDS", "15"))
+
+    JWT_SECRET: str = os.getenv("JWT_SECRET", "changeme-dev")
+    JWT_ALGO: str = os.getenv("JWT_ALGO", "HS256")
+    JWT_TTL_SECONDS: int = int(os.getenv("JWT_TTL_SECONDS", "3600"))
+    CORS_ORIGINS: list[str] = _split_csv(os.getenv("CORS_ORIGINS", ""))
+
+    DB_DSN: str = os.getenv("DB_DSN", "sqlite:///./cc.db")
+
+
+settings = Settings()
