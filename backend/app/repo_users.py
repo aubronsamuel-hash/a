@@ -16,8 +16,19 @@ def list_users(db: Session, offset: int, limit: int) -> Sequence[User]:
     return db.scalars(select(User).offset(offset).limit(limit)).all()
 
 
-def create_user(db: Session, username: str, password_hash: str) -> User:
-    u = User(username=username, password_hash=password_hash)
+def create_user(db: Session, username: str, password_hash: str, role: str = "user") -> User:
+    u = User(username=username, password_hash=password_hash, role=role)
+    db.add(u)
+    db.flush()
+    db.refresh(u)
+    return u
+
+
+def promote_to_admin(db: Session, username: str) -> User | None:
+    u = get_by_username(db, username)
+    if not u:
+        return None
+    u.role = "admin"
     db.add(u)
     db.flush()
     db.refresh(u)

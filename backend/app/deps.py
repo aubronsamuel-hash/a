@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Generator
-
-from fastapi import Header, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from fastapi import Depends, Header, HTTPException, Query, status
 
 from .config import settings
 from .db import SessionLocal
@@ -22,7 +19,7 @@ def pagination_params(
     return {"page": page, "page_size": page_size}
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_db():
     db = SessionLocal()
     try:
         yield db
@@ -35,4 +32,11 @@ def get_current_user(authorization: str | None = Header(default=None)) -> dict[s
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token manquant")
     token = authorization.split(" ", 1)[1]
     data = decode_access_token(token)
-    return {"username": data.sub}
+    return {"username": data.sub, "role": data.role}
+
+
+def require_admin(current=Depends(get_current_user)) -> dict[str, str]:  # noqa: B008
+    if current["role"] != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acces admin requis")
+    return current
+
