@@ -22,6 +22,9 @@ class Settings:
     JWT_TTL_SECONDS: int = int(os.getenv("JWT_TTL_SECONDS", "3600"))
     CORS_ORIGINS: list[str] = _split_csv(os.getenv("CORS_ORIGINS", ""))
 
+    DEV_USER: str = os.getenv("DEV_USER", "admin")
+    DEV_PASSWORD: str = os.getenv("DEV_PASSWORD", "admin123")
+
     DB_DSN: str = os.getenv("DB_DSN", "sqlite:///./cc.db")
 
 

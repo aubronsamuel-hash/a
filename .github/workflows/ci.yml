@@ -23,6 +23,9 @@ jobs:
           ruff backend
           mypy backend
       - name: Tests
+        env:
+          DEV_USER: admin
+          DEV_PASSWORD: admin123
         run: |
           pytest -q --cov=backend
   compose_smoke:
@@ -30,6 +33,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build and run compose
+        env:
+          DEV_USER: admin
+          DEV_PASSWORD: admin123
         run: |
           docker compose up -d --build
           sleep 5

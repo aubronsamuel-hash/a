@@ -7,7 +7,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
-from .api import router
+from .api import router as api_router
+from .auth import router as auth_router
 from .config import settings
 
 
@@ -33,8 +34,7 @@ def create_app() -> FastAPI:
         )
 
     @app.middleware("http")
-    async def timeout_and_logging(request: Request, call_next):
-        # Logs FR et simple controle de timeout cote client (recommande httpx cote client)
+    async def logging_mw(request: Request, call_next):
         logging.info("Requete %s %s", request.method, request.url.path)
         response = await call_next(request)
         return response
@@ -44,7 +44,8 @@ def create_app() -> FastAPI:
         logging.exception("Erreur serveur: %s", exc)
         return JSONResponse({"detail": "Erreur interne serveur"}, status_code=500)
 
-    app.include_router(router)
+    app.include_router(auth_router)
+    app.include_router(api_router)
     return app
 
 

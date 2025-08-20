@@ -1,19 +1,18 @@
-# Coulisses Crew API (ETAPE 1)
+# Coulisses Crew API (ETAPE 2)
 
-Windows-first. Voir dossiers PS1/ pour scripts.
-
-## Local (sans Docker)
-
-* PS1/setup.ps1 : cree venv, installe deps
-* PS1/run.ps1 : lance l API
-* PS1/test.ps1 : tests unitaires + HTTP
-* PS1/lint.ps1 : ruff + mypy
-
-## Docker
-
-* PS1/compose_up.ps1 / compose_down.ps1
+Auth JWT minimale de dev (NE PAS UTILISER EN PROD telle quelle).
 
 ## Endpoints
 
 * GET /healthz
+* POST /auth/token {username,password}
+* GET /auth/me (Bearer)
+* GET /debug/secret (Bearer)
 * POST /echo
+
+## Flux dev rapide
+
+1. Copier .env.example en .env et ajuster DEV_USER/DEV_PASSWORD
+2. PS1\setup.ps1
+3. PS1\run.ps1
+4. PS1\smoke_auth.ps1 (teste token + routes protegees)
