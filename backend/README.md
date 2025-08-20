@@ -1,21 +1,19 @@
-# Coulisses Crew API (ETAPE 3)
+# ETAPE 5 - Alembic + PostgreSQL
 
-Persistence SQLite + Users en DB + Auth via DB + autoseed admin.
+* SQLite par defaut pour le dev rapide
+* Postgres via DB_DSN et docker-compose (service db)
+* Alembic: upgrade/downgrade/revision
 
-## Endpoints
+## PowerShell (Windows)
 
-* GET /healthz
-* POST /auth/token
-* GET /auth/me
-* GET /users (Bearer)
-* POST /users (Bearer)
+PS> .\PS1\setup.ps1
+PS> .\PS1\alembic_upgrade.ps1
+PS> .\PS1\run_bg.ps1
 
-## Local Windows
+## Docker Compose (Postgres)
 
-PS1\setup.ps1
+PS> Copy-Item .env.example .env
 
-PS1\run.ps1 ou PS1\run_bg.ps1
+# Optionnel: setx DB_DSN "postgresql+psycopg://app:app@localhost:5432/app"
 
-PS1\db_reset.ps1, PS1\db_seed_admin.ps1
-
-PS1\smoke_auth.ps1
+PS> .\PS1\compose_up.ps1

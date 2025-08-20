@@ -9,6 +9,7 @@ def test_health_ok() -> None:
     r = client.get("/healthz")
     assert r.status_code == 200
     assert r.json()["status"] == "ok"
+    assert r.json()["version"] == "0.5.0"
 
 
 def test_unknown_path_404() -> None:
