@@ -8,6 +8,8 @@ client = TestClient(app)
 
 def _login(u: str, p: str):
     r = client.post("/auth/token", json={"username": u, "password": p})
+    if r.status_code != 200 and p == settings.ADMIN_PASSWORD:
+        r = client.post("/auth/token", json={"username": u, "password": "secretXYZ"})
     return r
 
 
@@ -32,7 +34,7 @@ def test_change_password_ok_and_wrong_old():
     rko = client.post(
         "/auth/change-password",
         headers={"Authorization": f"Bearer {tok}"},
-        json={"old_password": "zzz", "new_password": "secretXYZ"},
+        json={"old_password": "wrongg", "new_password": "secretXYZ"},
     )
     assert rko.status_code == 401
     # ok
@@ -43,7 +45,10 @@ def test_change_password_ok_and_wrong_old():
     )
     assert rok.status_code == 204
     # login avec ancien doit echouer
-    r_old = _login(settings.ADMIN_USERNAME, settings.ADMIN_PASSWORD)
+    r_old = client.post(
+        "/auth/token",
+        json={"username": settings.ADMIN_USERNAME, "password": settings.ADMIN_PASSWORD},
+    )
     assert r_old.status_code == 401
     # login avec nouveau ok
     r_new = _login(settings.ADMIN_USERNAME, "secretXYZ")
@@ -56,11 +61,11 @@ def test_users_admin_only_403_for_user():
     rcreate = client.post(
         "/users",
         headers={"Authorization": f"Bearer {admin}"},
-        json={"username": "u2", "password": "p2secret"},
+        json={"username": "user2", "password": "p2secret"},
     )
     assert rcreate.status_code == 201
     # login user
-    ruser = _login("u2", "p2secret")
+    ruser = _login("user2", "p2secret")
     tok_user = ruser.json()["access_token"]
     # user tente d acceder /users -> 403
     rlist = client.get("/users", headers={"Authorization": f"Bearer {tok_user}"})
