@@ -22,10 +22,16 @@ class Settings:
     JWT_TTL_SECONDS: int = int(os.getenv("JWT_TTL_SECONDS", "3600"))
     CORS_ORIGINS: list[str] = _split_csv(os.getenv("CORS_ORIGINS", ""))
 
-    DEV_USER: str = os.getenv("DEV_USER", "admin")
-    DEV_PASSWORD: str = os.getenv("DEV_PASSWORD", "admin123")
+    # Admin autoseed
+    ADMIN_AUTOSEED: bool = os.getenv("ADMIN_AUTOSEED", "true").lower() == "true"
+    ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
+    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin123")
 
+    # DB
     DB_DSN: str = os.getenv("DB_DSN", "sqlite:///./cc.db")
+    DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
+    DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
+    DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "10"))
 
 
 settings = Settings()

@@ -1,18 +1,21 @@
-# Coulisses Crew API (ETAPE 2)
+# Coulisses Crew API (ETAPE 3)
 
-Auth JWT minimale de dev (NE PAS UTILISER EN PROD telle quelle).
+Persistence SQLite + Users en DB + Auth via DB + autoseed admin.
 
 ## Endpoints
 
 * GET /healthz
-* POST /auth/token {username,password}
-* GET /auth/me (Bearer)
-* GET /debug/secret (Bearer)
-* POST /echo
+* POST /auth/token
+* GET /auth/me
+* GET /users (Bearer)
+* POST /users (Bearer)
 
-## Flux dev rapide
+## Local Windows
 
-1. Copier .env.example en .env et ajuster DEV_USER/DEV_PASSWORD
-2. PS1\setup.ps1
-3. PS1\run.ps1
-4. PS1\smoke_auth.ps1 (teste token + routes protegees)
+PS1\setup.ps1
+
+PS1\run.ps1 ou PS1\run_bg.ps1
+
+PS1\db_reset.ps1, PS1\db_seed_admin.ps1
+
+PS1\smoke_auth.ps1
