@@ -15,7 +15,7 @@ class HealthModel(BaseModel):
 
 @router.get("/healthz", response_model=HealthModel, tags=["health"])
 def healthz():
-    return {"status": "ok", "version": "0.3.0"}
+    return {"status": "ok", "version": "0.5.0"}
 
 
 class EchoIn(BaseModel):

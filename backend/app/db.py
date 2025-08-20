@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from typing import Any
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
@@ -12,18 +13,18 @@ class Base(DeclarativeBase):
     pass
 
 
-connect_args: dict[str, object] = {}
-engine_args: dict[str, object] = {}
-if settings.DB_DSN.startswith("sqlite"):
-    connect_args = {"check_same_thread": False}
-else:
-    engine_args = {
-        "pool_size": settings.DB_POOL_SIZE,
-        "max_overflow": settings.DB_MAX_OVERFLOW,
-        "pool_timeout": settings.DB_POOL_TIMEOUT,
-    }
+def _engine_kwargs() -> dict[str, Any]:
+    kw: dict[str, Any] = {}
+    if settings.DB_DSN.startswith("sqlite"):
+        kw["connect_args"] = {"check_same_thread": False}
+    else:
+        kw["pool_size"] = settings.DB_POOL_SIZE
+        kw["max_overflow"] = settings.DB_MAX_OVERFLOW
+        kw["pool_timeout"] = settings.DB_POOL_TIMEOUT
+    return kw
 
-engine = create_engine(settings.DB_DSN, connect_args=connect_args, **engine_args)
+
+engine = create_engine(settings.DB_DSN, **_engine_kwargs())
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
