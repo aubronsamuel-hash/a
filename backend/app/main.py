@@ -25,6 +25,7 @@ def create_app() -> FastAPI:
     _setup_logging()
     app = FastAPI(title=settings.APP_NAME)
     if settings.CORS_ORIGINS:
+        # Enable CORS for configured origins
         app.add_middleware(
             CORSMiddleware,
             allow_origins=settings.CORS_ORIGINS,
