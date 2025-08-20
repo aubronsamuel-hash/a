@@ -1,0 +1,39 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          pip install -e backend[dev]
+      - name: Lint
+        run: |
+          ruff backend
+          mypy backend
+      - name: Tests
+        run: |
+          pytest -q --cov=backend
+  compose_smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run compose
+        run: |
+          docker compose up -d --build
+          sleep 5
+          set +e
+          code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/healthz)
+          echo "HTTP=$code"
+          test "$code" = "200"
