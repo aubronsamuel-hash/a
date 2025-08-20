@@ -5,11 +5,16 @@ from logging import Formatter, StreamHandler
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import IntegrityError
 from starlette.responses import JSONResponse
 
 from .api import router as api_router
 from .auth import router as auth_router
 from .config import settings
+from .db import Base, engine, session_scope
+from .hash import hash_password
+from .repo_users import create_user, get_by_username
+from .users_api import router as users_router
 
 
 def _setup_logging() -> None:
@@ -21,11 +26,29 @@ def _setup_logging() -> None:
     root.handlers = [handler]
 
 
+def _auto_seed_admin() -> None:
+    if not settings.ADMIN_AUTOSEED:
+        return
+    with session_scope() as db:
+        if get_by_username(db, settings.ADMIN_USERNAME):
+            return
+        try:
+            create_user(db, settings.ADMIN_USERNAME, hash_password(settings.ADMIN_PASSWORD))
+            logging.info("Admin autoseed cree: %s", settings.ADMIN_USERNAME)
+        except IntegrityError:
+            db.rollback()
+
+
 def create_app() -> FastAPI:
     _setup_logging()
+    # Init DB schema
+    Base.metadata.create_all(bind=engine)
+
+    # Auto-seed admin
+    _auto_seed_admin()
+
     app = FastAPI(title=settings.APP_NAME)
     if settings.CORS_ORIGINS:
-        # Enable CORS for configured origins
         app.add_middleware(
             CORSMiddleware,
             allow_origins=settings.CORS_ORIGINS,
@@ -47,6 +70,7 @@ def create_app() -> FastAPI:
 
     app.include_router(auth_router)
     app.include_router(api_router)
+    app.include_router(users_router)
     return app
 
 
