@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import asc, desc, func, select
 from sqlalchemy.orm import Session
 
 from .models import User
@@ -12,8 +13,24 @@ def get_by_username(db: Session, username: str) -> User | None:
     return db.scalar(select(User).where(User.username == username))
 
 
-def list_users(db: Session, offset: int, limit: int) -> Sequence[User]:
-    return db.scalars(select(User).offset(offset).limit(limit)).all()
+def list_users(db: Session, offset: int, limit: int, order: str = "created_desc") -> Sequence[User]:
+    order_col: Any = {
+        "created_asc": asc(User.created_at),
+        "created_desc": desc(User.created_at),
+        "username_asc": asc(User.username),
+        "username_desc": desc(User.username),
+    }.get(order, desc(User.created_at))
+    stmt = select(User).order_by(order_col).offset(offset).limit(limit)
+    return db.scalars(stmt).all()
+
+
+def count_users(db: Session) -> int:
+    return db.scalar(select(func.count()).select_from(User)) or 0
+
+
+def last_ts_users(db: Session):
+    # utilise COALESCE(updated_at, created_at) pour robustesse
+    return db.scalar(select(func.max(func.coalesce(User.updated_at, User.created_at))))
 
 
 def create_user(db: Session, username: str, password_hash: str, role: str = "user") -> User:

@@ -25,6 +25,8 @@ def test_users_list_and_create_ok_ko():
     t = _token()
     r = client.get("/users", headers={"Authorization": f"Bearer {t}"})
     assert r.status_code == 200
+    j = r.json()
+    assert "meta" in j and "data" in j
     r2 = client.post(
         "/users",
         headers={"Authorization": f"Bearer {t}"},
