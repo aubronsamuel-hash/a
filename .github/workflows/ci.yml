@@ -41,18 +41,26 @@ jobs:
           pytest -q --cov=backend
   windows_smoke:
     runs-on: windows-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-      - name: Install (venv)
+      - name: Python deps (venv inline)
         shell: pwsh
         run: |
           python -m pip install -U pip
           pip install -e backend[dev]
+      - name: Assert files present
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse PS1 | Out-String | Write-Host
+          if (-not (Test-Path "PS1/run_bg.ps1")) { Write-Error "PS1/run_bg.ps1 manquant" ; exit 1 }
+          if (-not (Test-Path "PS1/smoke_auth.ps1")) { Write-Error "PS1/smoke_auth.ps1 manquant" ; exit 1 }
       - name: Create .env (defaults for CI)
         shell: pwsh
         run: |
@@ -69,15 +77,13 @@ jobs:
           "@ | Out-File -FilePath .env -Encoding ascii
       - name: Start API (bg)
         shell: pwsh
-        run: |
-          ./PS1/run_bg.ps1
+        run: ./PS1/run_bg.ps1
       - name: Smoke auth (PowerShell)
         shell: pwsh
         env:
           DEV_USER: admin
           DEV_PASSWORD: admin123
-        run: |
-          ./PS1/smoke_auth.ps1
+        run: ./PS1/smoke_auth.ps1
   compose_smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 10
