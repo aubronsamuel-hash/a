@@ -53,7 +53,7 @@ jobs:
       - name: Assert scripts present
         shell: pwsh
         run: |
-          Get-ChildItem -Recurse PS1 | Out-String | Write-Host
+          if (-not (Test-Path "PS1")) { Write-Error "Dossier PS1 manquant" ; exit 1 }
           if (-not (Test-Path "PS1/setup.ps1")) { Write-Error "PS1/setup.ps1 manquant" ; exit 1 }
           if (-not (Test-Path "PS1/run_bg.ps1")) { Write-Error "PS1/run_bg.ps1 manquant" ; exit 1 }
           if (-not (Test-Path "PS1/smoke_auth.ps1")) { Write-Error "PS1/smoke_auth.ps1 manquant" ; exit 1 }
