@@ -63,5 +63,13 @@ class Settings:
     # Audit
     AUDIT_LOG_PATH: str = os.getenv("AUDIT_LOG_PATH", "audit.jsonl")
 
+    # Readiness
+    READINESS_DB_TIMEOUT_SECONDS: int = int(
+        os.getenv("READINESS_DB_TIMEOUT_SECONDS", "2")
+    )
+    READINESS_REQUIRE_REDIS: bool = os.getenv(
+        "READINESS_REQUIRE_REDIS", "false"
+    ).lower() == "true"
+
 
 settings = Settings()

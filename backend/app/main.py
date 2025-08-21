@@ -12,7 +12,6 @@ from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from starlette.responses import JSONResponse, Response
 from starlette.staticfiles import StaticFiles
@@ -199,19 +198,6 @@ def create_app() -> FastAPI:
     async def on_error(request: Request, exc: Exception):  # noqa: D401 - simple handler
         logging.exception("Erreur serveur: %s", exc)
         return JSONResponse({"detail": "Erreur interne serveur"}, status_code=500)
-
-    @app.get("/livez", tags=["health"])
-    def livez():  # noqa: D401 - health endpoint
-        return {"status": "alive"}
-
-    @app.get("/readyz", tags=["health"])
-    def readyz():  # noqa: D401 - readiness endpoint
-        try:
-            with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
-            return {"status": "ready"}
-        except Exception:  # pragma: no cover - defensive
-            return JSONResponse({"status": "not-ready"}, status_code=503)
 
     app.include_router(auth_router)
     app.include_router(api_router)
