@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ccdb
+      POSTGRES_USER: cc
+      POSTGRES_PASSWORD: cc
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U cc -d ccdb"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: .
+    environment:
+      DB_DSN: postgresql+psycopg://cc:cc@db:5432/ccdb
+      ADMIN_AUTOSEED: "true"
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin123
+      FRONT_DIST_DIR: /app/public
+    ports:
+      - "8001:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

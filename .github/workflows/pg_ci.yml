@@ -1,0 +1,52 @@
+name: Postgres Integration
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/pg_ci.yml"
+      - "docker-compose.postgres.yml"
+      - "scripts/bash/compose_up_postgres.sh"
+      - "PS1/compose_up_postgres.ps1"
+  push:
+    branches: [ main ]
+
+jobs:
+  test-pg:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ccdb
+          POSTGRES_USER: cc
+          POSTGRES_PASSWORD: cc
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U cc -d ccdb"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: "pip" }
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e backend[dev]
+      - name: Run PG tests
+        env:
+          PG_TEST_DSN: postgresql+psycopg://cc:cc@localhost:5432/ccdb
+        run: |
+          python - << 'PY'
+import time, socket
+s=socket.socket();
+for _ in range(60):
+    try:
+        s.connect(("127.0.0.1",5432)); s.close(); break
+    except Exception:
+        time.sleep(1)
+PY
+          pytest -q --cov=backend -k "postgres_integration" -q
