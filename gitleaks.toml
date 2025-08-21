@@ -1,0 +1,6 @@
+[extend]
+allowlist = [
+  "change_me",
+  "example.com",
+  "BEGIN AGE PRIVATE KEY"
+]

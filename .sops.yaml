@@ -1,0 +1,8 @@
+# Configuration SOPS: encrypt matching files with age
+creation_rules:
+  - path_regex: ^secrets/.*\.enc.(ya?ml|json|toml)$
+    key_groups:
+      - age:
+          - age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    encrypted_regex: '^(data|stringData|password|secret|token|credentials)$'
+    mac_only_encrypted: false
