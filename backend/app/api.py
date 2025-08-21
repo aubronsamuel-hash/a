@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from .deps import get_current_user, pagination_params
+from .version import version
 
 router = APIRouter()
 
@@ -14,8 +15,8 @@ class HealthModel(BaseModel):
 
 
 @router.get("/healthz", response_model=HealthModel, tags=["health"])
-def healthz():
-    return {"status": "ok", "version": "0.9.0"}
+def healthz() -> HealthModel:
+    return HealthModel(status="ok", version=version)
 
 
 class EchoIn(BaseModel):

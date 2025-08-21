@@ -16,6 +16,7 @@ Monorepo FastAPI (backend) + React Vite (frontend). Windows-first (PowerShell), 
 - [PowerShell 7 (pwsh)](#powershell-7-pwsh)
 - [Sans Docker](#sans-docker)
 - [CI GitHub Actions](#ci-github-actions)
+- [Releases](#releases)
 - [Tests et Qualité](#tests-et-qualite)
 - [Observabilité](#observabilite)
 - [Sécurité](#securite)
@@ -249,6 +250,29 @@ Jobs :
 - `compose_smoke` (docker compose + healthz)
 - `postgres_tests` (service Postgres, alembic upgrade, tests)
 - `frontend` (npm ci, lint, test, build, smoke ETag cross-OS)
+
+## Releases
+
+### Tagger une version (Windows)
+
+```
+.\PS1\release_tag.ps1 -Version 1.0.1
+# Dry-run:
+.\PS1\release_tag.ps1 -Version 1.0.1 -DryRun
+```
+
+### Tagger une version (Linux/mac)
+
+```
+bash scripts/bash/release_tag.sh 1.0.1
+# Dry-run:
+DRYRUN=1 bash scripts/bash/release_tag.sh 1.0.1
+```
+
+### CI de release
+
+* Un tag `vX.Y.Z` declenche `.github/workflows/release.yml`.
+* L'image est publiee sur GHCR: `ghcr.io/<owner>/ccapi:vX.Y.Z`.
 
 ## Tests et Qualité
 
