@@ -513,6 +513,26 @@ bash scripts/bash/health_check.sh http://localhost:8001
 - Headers sécurité : `HSTS`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `CSP`, `Permissions-Policy`
 - CORS configurable
 
+### Securite CI (pip-audit & Trivy)
+
+* **Deps Python**: `pip-audit` produit un rapport SARIF et echoue sur vuln High/Critical.
+
+  ```
+  # Windows
+  powershell -File PS1\sec_pip_audit.ps1
+  # Bash
+  bash scripts/bash/sec_pip_audit.sh
+  ```
+* **Image Docker**: `trivy` scanne l image (si Docker dispo). Sans trivy local, le script utilise un conteneur `aquasec/trivy`.
+
+  ```
+  # Windows
+  powershell -File PS1\sec_trivy_image.ps1 -Image ccapi:cli-ci
+  # Bash
+  bash scripts/bash/sec_trivy_image.sh ccapi:cli-ci
+  ```
+* Les rapports SARIF sont uploades par le workflow `Security Scans` dans **Code scanning alerts**.
+
 ### En-tetes de securite
 
 Variables d env:
