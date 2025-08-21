@@ -1,10 +1,5 @@
 from __future__ import annotations
-
 import os
-
-
-def _split_csv(value: str) -> list[str]:
-    return [v.strip() for v in value.split(",") if v.strip()]
 
 
 class Settings:
@@ -22,7 +17,6 @@ class Settings:
     JWT_TTL_SECONDS: int = int(os.getenv("JWT_TTL_SECONDS", "3600"))
     REFRESH_JWT_SECRET: str = os.getenv("REFRESH_JWT_SECRET", "changeme-refresh-dev")
     REFRESH_JWT_TTL_SECONDS: int = int(os.getenv("REFRESH_JWT_TTL_SECONDS", "1209600"))
-    CORS_ORIGINS: list[str] = _split_csv(os.getenv("CORS_ORIGINS", ""))
 
     ADMIN_AUTOSEED: bool = os.getenv("ADMIN_AUTOSEED", "true").lower() == "true"
     ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")

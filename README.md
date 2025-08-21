@@ -96,9 +96,29 @@ Fichier `.env` à la racine. Voir `.env.example` fourni. Points clés:
 - `DB_DSN`: `sqlite:///./cc.db` (défaut) ou `postgresql+psycopg://user:pass@host:5432/db`
 - `ADMIN_AUTOSEED=true`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`
 - JWT/REFRESH: secrets et TTL
-- `CORS_ORIGINS`: p. ex. `http://localhost:5173`
+- CORS_* : `CORS_ENABLE`, `CORS_ALLOW_ORIGINS`, `CORS_ALLOW_METHODS`, `CORS_ALLOW_HEADERS`, `CORS_ALLOW_CREDENTIALS`, `CORS_MAX_AGE`
 - Observabilité: `REQUEST_ID_HEADER`, `LOG_JSON`
 - Rate limiting: `RATE_LIMIT_*`
+
+### CORS (configurable)
+
+Variables d env:
+
+* `CORS_ENABLE=true|false`
+* `CORS_ALLOW_ORIGINS` (CSV) ex: `http://localhost:5173,https://app.example.com`
+* `CORS_ALLOW_METHODS` (CSV)
+* `CORS_ALLOW_HEADERS` (CSV)
+* `CORS_ALLOW_CREDENTIALS=true|false`
+* `CORS_MAX_AGE` (secondes, defaut 600)
+
+Smoke:
+
+```
+# Windows
+powershell -File PS1\cors_smoke.ps1 -Base http://localhost:8001 -Origin http://localhost:5173
+# Bash
+bash scripts/bash/cors_smoke.sh http://localhost:8001 http://localhost:5173
+```
 
 ## Scripts utiles
 

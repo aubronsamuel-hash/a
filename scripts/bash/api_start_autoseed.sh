@@ -8,7 +8,8 @@ set -euo pipefail
 : "${JWT_SECRET:=ci-secret}"
 : "${JWT_ALGO:=HS256}"
 : "${JWT_TTL_SECONDS:=3600}"
-: "${CORS_ORIGINS:=http://localhost:3000,http://localhost:5173}"
+: "${CORS_ENABLE:=true}"
+: "${CORS_ALLOW_ORIGINS:=http://localhost:3000,http://localhost:5173}"
 : "${DB_DSN:=sqlite:///./cc.db}"
 python -m pip install --upgrade pip >/dev/null
 pip install -q -e backend[dev]
