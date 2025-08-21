@@ -31,6 +31,9 @@ dev = [
     "fakeredis==2.23.3",
 ]
 
+[project.scripts]
+ccadmin = "app.cli:main"
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
