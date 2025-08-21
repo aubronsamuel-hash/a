@@ -564,6 +564,32 @@ HSTS_PRELOAD=false
 - **pwsh introuvable** : sur Windows utiliser `powershell.exe`; en CI fallback bash implémenté.
 - **Docker indisponible sur runner** : le job `compose_smoke` se termine proprement en no-op.
 
+### Sauvegarde / Restore DB
+
+Par defaut, DSN: `DB_DSN` (sinon `sqlite:///./cc.db`).
+
+SQLite:
+
+```
+# Windows
+powershell -File PS1\db_backup.ps1 -Out backups\cc.sqlite
+powershell -File PS1\db_restore.ps1 -In backups\cc.sqlite -Overwrite
+
+# Bash
+bash scripts/bash/db_backup.sh backups/cc.sqlite
+bash scripts/bash/db_restore.sh backups/cc.sqlite --overwrite
+```
+
+Postgres (optionnel, si `pg_dump` / `psql` / `pg_restore` installes):
+
+```
+# Exemple DSN
+$env:DB_DSN="postgresql+psycopg://cc:cc@localhost:5432/ccdb"
+powershell -File PS1\db_backup.ps1 -Out backups\cc.pg.dump
+powershell -File PS1\db_restore.ps1 -In backups\cc.pg.dump
+```
+
+En absence des outils, un message clair est renvoye.
 ## Roadmap / Étapes livrées
 
 1. Setup backend de base
