@@ -1,0 +1,21 @@
+{
+auto_https off
+servers {
+protocol {
+experimental_http3
+}
+}
+}
+
+:80 {
+root * /app/frontend/dist
+encode gzip zstd br
+file_server
+
+@static {
+    path *.js *.css *.ico *.png *.jpg *.svg *.woff2
+    file
+}
+header @static Cache-Control "public, max-age=31536000, immutable"
+header @static ETag {file.etag}
+}
