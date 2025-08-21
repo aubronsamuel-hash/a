@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  api:
+    environment:
+      - WEB_CONCURRENCY=${WEB_CONCURRENCY:-}
+      - THREADS=${THREADS:-1}
+      - GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-30}
+      - GUNICORN_GRACEFUL_TIMEOUT=${GUNICORN_GRACEFUL_TIMEOUT:-30}
+      - GUNICORN_KEEPALIVE=${GUNICORN_KEEPALIVE:-5}
+      - GUNICORN_MAX_REQUESTS=${GUNICORN_MAX_REQUESTS:-500}
+      - GUNICORN_MAX_REQUESTS_JITTER=${GUNICORN_MAX_REQUESTS_JITTER:-50}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    command: ["bash","-lc","backend/start_gunicorn.sh"]
+    ports:
+      - "8000:8000"

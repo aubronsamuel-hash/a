@@ -212,6 +212,19 @@ def create_app() -> FastAPI:
     app.include_router(audit_router)
     app.include_router(features_router)
 
+    @app.get("/_meta/scaling")
+    def scaling_meta():  # noqa: D401 - expose current scaling env vars
+        keys = [
+            "WEB_CONCURRENCY",
+            "THREADS",
+            "GUNICORN_TIMEOUT",
+            "GUNICORN_GRACEFUL_TIMEOUT",
+            "GUNICORN_KEEPALIVE",
+            "GUNICORN_MAX_REQUESTS",
+            "GUNICORN_MAX_REQUESTS_JITTER",
+        ]
+        return {k: os.getenv(k) for k in keys}
+
     Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
     if settings.FRONT_DIST_DIR:
