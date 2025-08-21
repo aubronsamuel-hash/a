@@ -17,5 +17,10 @@ if [ "$code" != "200" ]; then
   sleep 5
 fi
 
-# E2E
+# Tenter auto-install chromium si absent
+if ! npx playwright browsers ls | grep -qi chromium; then
+  npx playwright install chromium || true
+fi
+
+# Lancer E2E
 ( cd web && npm run build && npx playwright test )
