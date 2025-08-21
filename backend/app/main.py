@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextvars
 import logging
 import os
+import json
 from pathlib import Path
 from uuid import uuid4
 
@@ -20,6 +21,7 @@ from .auth import router as auth_router
 from .auth_google import router as google_router
 from .config import settings
 from .db import Base, engine, session_scope
+from .health import router as health_router
 from .hash import hash_password
 from .rate_limit import get_limiter
 from .repo_users import create_user, get_by_username
@@ -179,6 +181,7 @@ def create_app() -> FastAPI:
         logging.exception("Erreur serveur: %s", exc)
         return JSONResponse({"detail": "Erreur interne serveur"}, status_code=500)
 
+    app.include_router(health_router)
     app.include_router(auth_router)
     app.include_router(google_router)
     app.include_router(api_router)
