@@ -13,6 +13,8 @@ Monorepo FastAPI (backend) + React Vite (frontend). Windows-first (PowerShell), 
 - [Back-end (FastAPI)](#back-end-fastapi)
 - [Front-end (Vite React)](#front-end-vite-react)
 - [Docker Compose (Postgres)](#docker-compose-postgres)
+- [PowerShell 7 (pwsh)](#powershell-7-pwsh)
+- [Sans Docker](#sans-docker)
 - [CI GitHub Actions](#ci-github-actions)
 - [Tests et Qualité](#tests-et-qualite)
 - [Observabilité](#observabilite)
@@ -203,6 +205,39 @@ Copy-Item .env.example .env
 cp .env.example .env
 docker compose up -d --build
 curl -sf http://localhost:8001/healthz
+```
+
+## PowerShell 7 (pwsh)
+
+### Linux (Debian/Ubuntu)
+
+```
+sudo bash scripts/bash/install_pwsh.sh
+pwsh -NoProfile -Command "$PSVersionTable.PSVersion"
+```
+
+### Windows
+
+```
+# en PowerShell admin
+./PS1/install_pwsh_on_windows.ps1
+# ou directement:
+winget install --id Microsoft.PowerShell -e
+# ou:
+choco install powershell-core -y
+```
+
+Si pwsh indisponible, utilisez les scripts Bash (`scripts/bash/*.sh`) qui couvrent toutes les taches courantes.
+
+## Sans Docker
+
+Docker n est pas requis pour le dev local:
+
+```
+bash scripts/bash/web_build.sh
+FRONT_DIST_DIR=$(pwd)/web/dist python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8001
+# Smoke:
+curl -sf http://localhost:8001/healthz && curl -sf http://localhost:8001/ | head -c 60
 ```
 
 ## CI GitHub Actions
