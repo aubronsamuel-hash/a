@@ -50,5 +50,8 @@ class Settings:
     RATE_LIMIT_BACKEND: str = os.getenv("RATE_LIMIT_BACKEND", "memory")
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
+    # Frontend build (SPA)
+    FRONT_DIST_DIR: str = os.getenv("FRONT_DIST_DIR", "")
+
 
 settings = Settings()
