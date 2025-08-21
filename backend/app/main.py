@@ -19,6 +19,7 @@ from starlette.staticfiles import StaticFiles
 from .api import router as api_router
 from .audit_api import router as audit_router
 from .auth import router as auth_router
+from .auth_google import router as google_router
 from .config import settings
 from .db import Base, engine, session_scope
 from .hash import hash_password
@@ -207,6 +208,7 @@ def create_app() -> FastAPI:
         return JSONResponse({"detail": "Erreur interne serveur"}, status_code=500)
 
     app.include_router(auth_router)
+    app.include_router(google_router)
     app.include_router(api_router)
     app.include_router(users_router)
     app.include_router(audit_router)
