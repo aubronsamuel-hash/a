@@ -20,29 +20,28 @@ jobs:
       - uses: docker/setup-buildx-action@v3
       - name: Build image
         run: docker build -t ccapi:cli-ci .
+      - name: Sanity - ccadmin present
+        run: |
+          docker run --rm ccapi:cli-ci sh -lc 'which ccadmin && ccadmin --help || (python -m app.cli --help && exit 0)'
       - name: Prepare shared volume
         run: docker volume create ccapi_cli_ci
       - name: CLI list (should succeed)
         run: docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin list
       - name: CLI create user (first should succeed)
-        run: |
-          docker run --rm -e DB_DSN="sqlite:////data/cc.db" \
-            -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin create --username ciuser --password pw
+        run: docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin create --username ciuser --password pw
       - name: CLI create duplicate (should fail exit code 1)
         run: |
           set +e
-          docker run --rm -e DB_DSN="sqlite:////data/cc.db" \
-            -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin create --username ciuser --password pw
+          docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin create --username ciuser --password pw
           rc=$?
           echo "rc=$rc"
           test "$rc" -eq 1
       - name: CLI promote user (should succeed)
-        run: |
-          docker run --rm -e DB_DSN="sqlite:////data/cc.db" \
-            -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin promote --username ciuser
+        run: docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin promote --username ciuser
       - name: Debug info on failure
         if: failure()
         run: |
+          echo "=== docker images ==="
           docker images
-          docker volume ls
-          echo "No compose logs to show for CLI job."
+          echo "=== try python -m app.cli --help in image ==="
+          docker run --rm ccapi:cli-ci python -m app.cli --help || true

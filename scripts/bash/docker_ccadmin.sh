@@ -20,26 +20,20 @@ fi
 
 docker volume create "$VOLUME" >/dev/null
 
-BASE_RUN=(docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v "${VOLUME}:/data" "$IMAGE" ccadmin)
+BASE_RUN=(docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v "${VOLUME}:/data" "$IMAGE")
+
+# Si ccadmin indisponible, fallback python -m app.cli
+
+if docker run --rm "$IMAGE" sh -lc 'which ccadmin' >/dev/null 2>&1; then
+  EXEC_CMD=(ccadmin)
+else
+  EXEC_CMD=(python -m app.cli)
+fi
 
 case "$CMD" in
-  list)
-    "${BASE_RUN[@]}" list
-    ;;
-  create)
-    # --username --password [--role]
-    "${BASE_RUN[@]}" create "$@"
-    ;;
-  promote)
-    # --username
-    "${BASE_RUN[@]}" promote "$@"
-    ;;
-  reset-password)
-    # --username --new-password
-    "${BASE_RUN[@]}" reset-password "$@"
-    ;;
-  *)
-    echo "Commande inconnue: $CMD" >&2
-    exit 2
-    ;;
+  list)            "${BASE_RUN[@]}" "${EXEC_CMD[@]}" list ;;
+  create)          "${BASE_RUN[@]}" "${EXEC_CMD[@]}" create "$@" ;;
+  promote)         "${BASE_RUN[@]}" "${EXEC_CMD[@]}" promote "$@" ;;
+  reset-password)  "${BASE_RUN[@]}" "${EXEC_CMD[@]}" reset-password "$@" ;;
+  *) echo "Commande inconnue: $CMD" >&2; exit 2 ;;
 esac

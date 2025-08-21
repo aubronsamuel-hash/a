@@ -1,42 +1,42 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1
 
-# NOTE: ccadmin est deja disponible car `pip install -e backend` installe la console-script.
-# Usage:
-# docker run --rm ccapi:local ccadmin list
-# docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v ccapi_cli_data:/data ccapi:local ccadmin create --username alice --password pw
+# Etape Builder
+FROM python:3.11-slim AS builder
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# Stage 1: build front
-FROM node:20-alpine AS webbuild
-WORKDIR /web
-COPY web/package*.json ./
-RUN npm ci
-COPY web/ .
-RUN npm run build
+# deps build minimales (si besoin pour wheels)
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
 
-# Stage 2: runtime python + app
+# Copier uniquement le backend pour installer la lib
+COPY backend/ ./backend/
+
+# Installer en mode paquet (PAS editable) pour generer console_scripts dans /usr/local/bin
+RUN python -m pip install --upgrade pip && \
+    python -m pip install --no-cache-dir ./backend
+
+# Etape Runtime
 FROM python:3.11-slim AS runtime
+WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
-WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*
+    PATH="/usr/local/bin:${PATH}"
 
-# Backend source
-COPY backend /app/backend
+# Copier uniquement ce qui est necessaire a l exec (paquet deja dans layer base)
+COPY --from=builder /usr/local /usr/local
 
-# Deps (runtime)
-RUN python -m pip install --upgrade pip && pip install -e backend
+# Source app (pour assets/public si besoin et import runtime)
+COPY backend/ ./backend/
 
-# Front dist
-COPY --from=webbuild /web/dist /app/public
+# Front (si present) pour servir via FRONT_DIST_DIR
+COPY web/dist/ ./public/
 
-# Default env (override via -e)
-ENV FRONT_DIST_DIR=/app/public \
-    APP_HOST=0.0.0.0 \
+# Defaults (overridables)
+ENV APP_HOST=0.0.0.0 \
     APP_PORT=8001 \
-    ADMIN_AUTOSEED=true \
-    ADMIN_USERNAME=admin \
-    ADMIN_PASSWORD=admin123
+    FRONT_DIST_DIR=/app/public
 EXPOSE 8001
-HEALTHCHECK --interval=10s --timeout=3s --retries=10 CMD curl -fsS http://localhost:8001/healthz || exit 1
+
+# CMD par defaut (overridable par `docker run image ccadmin ...`)
 CMD ["python","-m","uvicorn","app.main:app","--app-dir","backend","--host","0.0.0.0","--port","8001"]
