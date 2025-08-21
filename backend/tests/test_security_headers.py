@@ -2,17 +2,17 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from app.main import app
-
-client = TestClient(app)
+from app.main import create_app
 
 
 def test_security_headers_present() -> None:
+    app = create_app()
+    client = TestClient(app)
     r = client.get("/healthz")
     assert r.status_code == 200
-    h = r.headers
+    h = {k.lower(): v for k, v in r.headers.items()}
     assert h.get("x-content-type-options") == "nosniff"
     assert h.get("x-frame-options") == "DENY"
-    assert "default-src" in (h.get("content-security-policy") or "")
-    assert h.get("referrer-policy") == "no-referrer"
-    assert "max-age" in (h.get("strict-transport-security") or "")
+    assert "default-src" in h.get("content-security-policy", "")
+    assert h.get("referrer-policy") == "strict-origin-when-cross-origin"
+    assert "strict-transport-security" not in h

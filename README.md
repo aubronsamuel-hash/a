@@ -471,6 +471,50 @@ bash scripts/bash/health_check.sh http://localhost:8001
 - Headers sécurité : `HSTS`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `CSP`, `Permissions-Policy`
 - CORS configurable
 
+### En-tetes de securite
+
+Variables d env:
+
+* `SEC_HEADERS_ENABLE=true|false`
+* `CSP_*` pour chaque directive (valeurs shortcuts: `self`, `none`, `data:` autorise via la directive)
+* `CSP_ALLOW_UNSAFE_INLINE=false` (eviter en prod)
+* `HSTS_ENABLE=true` + `HSTS_MAX_AGE`, `HSTS_INCLUDE_SUBDOMAINS`, `HSTS_PRELOAD`
+* `REFERRER_POLICY`, `X_FRAME_OPTIONS`, `PERMISSIONS_POLICY`
+
+Exemples:
+DEV (Vite/React etc.):
+
+```
+SEC_HEADERS_ENABLE=true
+CSP_DEFAULT_SRC='self'
+CSP_SCRIPT_SRC='self https://localhost:5173'
+CSP_STYLE_SRC='self https://localhost:5173'
+CSP_IMG_SRC='self data:'
+CSP_FONT_SRC='self data:'
+CSP_CONNECT_SRC='self https://localhost:5173'
+CSP_FRAME_SRC='none'
+CSP_ALLOW_UNSAFE_INLINE=false
+HSTS_ENABLE=false
+```
+
+PROD (strict):
+
+```
+SEC_HEADERS_ENABLE=true
+CSP_DEFAULT_SRC='self'
+CSP_SCRIPT_SRC='self'
+CSP_STYLE_SRC='self'
+CSP_IMG_SRC='self data:'
+CSP_FONT_SRC='self data:'
+CSP_CONNECT_SRC='self'
+CSP_FRAME_SRC='none'
+CSP_ALLOW_UNSAFE_INLINE=false
+HSTS_ENABLE=true
+HSTS_MAX_AGE=15552000
+HSTS_INCLUDE_SUBDOMAINS=true
+HSTS_PRELOAD=false
+```
+
 ## Dépannage
 
 - **401 sur /auth/token** : vérifier autoseed (`ADMIN_AUTOSEED=true`) ou créer un user admin.
