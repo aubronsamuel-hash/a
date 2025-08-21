@@ -1,0 +1,5 @@
+Migrations Alembic pour le schema SQLAlchemy (Base.metadata).
+
+* Generer une revision: alembic revision --autogenerate -m "message"
+* Migrer: alembic upgrade head
+* Downgrade: alembic downgrade -1

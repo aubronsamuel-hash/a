@@ -11,6 +11,7 @@ Monorepo FastAPI (backend) + React Vite (frontend). Windows-first (PowerShell), 
 - [Configuration (.env)](#configuration-env)
 - [Scripts utiles](#scripts-utiles)
 - [Back-end (FastAPI)](#back-end-fastapi)
+- [Migrations (Alembic)](#migrations-alembic)
 - [Front-end (Vite React)](#front-end-vite-react)
 - [Docker Compose (Postgres)](#docker-compose-postgres)
 - [PowerShell 7 (pwsh)](#powershell-7-pwsh)
@@ -104,7 +105,7 @@ Fichier `.env` à la racine. Voir `.env.example` fourni. Points clés:
 
 - `PS1\setup.ps1` : venv + deps backend
 - `PS1\run_bg.ps1` : lance l'API en arrière-plan (port 8001)
-- `PS1\alembic_upgrade.ps1` | `alembic_downgrade.ps1` | `alembic_revision.ps1`
+- `PS1\alembic_upgrade.ps1` | `alembic_downgrade.ps1` | `alembic_revision_autogen.ps1` | `alembic_current.ps1` | `alembic_history.ps1`
 - `PS1\web_setup.ps1` : deps web
 - `PS1\web_run.ps1` : lance Vite dev (port 5173)
 - `PS1\web_test.ps1` : lint + tests front
@@ -114,7 +115,7 @@ Fichier `.env` à la racine. Voir `.env.example` fourni. Points clés:
 
 ### Bash (Linux/mac)
 
-- `scripts/bash/alembic_upgrade.sh`
+- `scripts/bash/alembic_upgrade.sh` | `alembic_downgrade.sh` | `alembic_current.sh` | `alembic_history.sh` | `alembic_revision_autogen.sh`
 - `scripts/bash/web_setup.sh`, `web_run.sh`, `web_test.sh`
 - `scripts/bash/web_users_smoke.sh` (nécessite admin seed)
 - `scripts/bash/compose_up_redis.sh` (Docker Redis; message info si absent)
@@ -247,6 +248,38 @@ RBAC: rôle user/admin dans le token.
 
 Rate limiting: global et spécifique `/auth/token` (429 + `Retry-After`).
 
+### Migrations (Alembic)
+
+Commandes:
+
+```
+# Baseline OK (SQLite local)
+PYTHONPATH=backend alembic upgrade head
+# Generer une revision depuis Base.metadata
+PYTHONPATH=backend alembic revision --autogenerate -m "ajout champs X"
+# Downgrade
+PYTHONPATH=backend alembic downgrade -1
+```
+
+Scripts Windows:
+
+```
+powershell -File PS1\alembic_upgrade.ps1
+powershell -File PS1\alembic_revision_autogen.ps1 -Message "ajout table Y"
+```
+
+Scripts Bash:
+
+```
+bash scripts/bash/alembic_upgrade.sh
+bash scripts/bash/alembic_revision_autogen.sh "ajout table Y"
+```
+
+DSN:
+
+* Utilise `DB_DSN` si defini (SQLite par defaut). Exemple Postgres:
+  `DB_DSN=postgresql+psycopg://cc:cc@localhost:5432/ccdb PYTHONPATH=backend alembic upgrade head`
+
 ## Front-end (Vite React)
 
 Dev: `http://localhost:5173`
@@ -354,24 +387,19 @@ DRYRUN=1 bash scripts/bash/release_tag.sh 1.0.1
 ## Tests (PowerShell + curl)
 
 ```
-# Unitaires backend
-
+# Lints/typing/tests
 python -m ruff check backend
 python -m mypy backend
-PYTHONPATH=backend pytest -q --cov=backend -k "metrics_exposed or health or readiness"
+PYTHONPATH=backend pytest -q --cov=backend -k "migrations_smoke"
 
-# Smoke Docker (si Docker dispo)
+# Smoke Alembic (SQLite)
+PYTHONPATH=backend alembic upgrade head
 
-powershell -File PS1\observability_up.ps1
-powershell -File PS1\observability_smoke.ps1
-powershell -File PS1\observability_down.ps1
-
-# Bash equivalent
-
-bash scripts/bash/observability_up.sh
-bash scripts/bash/observability_smoke.sh
-bash scripts/bash/observability_down.sh
+# KO attendu (DSN invalide)
+( set DB_DSN=invalid:///nowhere && PYTHONPATH=backend alembic upgrade head ) # Windows
+DB_DSN=invalid:///nowhere PYTHONPATH=backend alembic upgrade head || echo "KO attendu"
 ```
+
 
 ## Tests et Qualité
 
