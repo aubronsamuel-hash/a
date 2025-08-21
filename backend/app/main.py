@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import contextvars
-import json
 import logging
 import os
-from datetime import UTC, datetime
-from logging import Formatter, LogRecord, StreamHandler
 from pathlib import Path
 from uuid import uuid4
 
@@ -15,6 +12,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy.exc import IntegrityError
 from starlette.responses import JSONResponse, Response
 from starlette.staticfiles import StaticFiles
+from .logging_setup import setup_logging_from_env, get_logger
 
 from .api import router as api_router
 from .audit_api import router as audit_router
@@ -37,34 +35,8 @@ _request_id_ctx: contextvars.ContextVar[str | None] = contextvars.ContextVar(
 )
 _global_limiter = get_limiter(settings.RATE_LIMIT_BACKEND, settings.REDIS_URL)
 
-
-class JsonFormatter(Formatter):
-    def format(self, record: LogRecord) -> str:  # noqa: D401 - simple JSON formatter
-        payload: dict[str, object] = {
-            "ts": datetime.now(tz=UTC).isoformat(),
-            "level": record.levelname,
-            "message": record.getMessage(),
-        }
-        rid = _request_id_ctx.get()
-        if rid:
-            payload["request_id"] = rid
-        if hasattr(record, "path"):
-            payload["path"] = record.path
-        if hasattr(record, "status_code"):
-            payload["status"] = record.status_code
-        return json.dumps(payload, ensure_ascii=True)
-
-
-def _setup_logging() -> None:
-    level = getattr(logging, settings.APP_LOG_LEVEL.upper(), logging.INFO)
-    logging.basicConfig(level=level)
-    handler = StreamHandler()
-    if settings.LOG_JSON:
-        handler.setFormatter(JsonFormatter())
-    else:
-        handler.setFormatter(Formatter("%(asctime)s [%(levelname)s] %(message)s"))
-    root = logging.getLogger()
-    root.handlers = [handler]
+setup_logging_from_env()
+log = get_logger("app")
 
 
 def _reset_db_if_testing() -> None:
@@ -102,7 +74,6 @@ MAINT_ALLOW_PATHS = {"/healthz", "/livez", "/readyz", "/metrics"}
 
 
 def create_app() -> FastAPI:
-    _setup_logging()
     _reset_db_if_testing()
     if not os.getenv("PYTEST_CURRENT_TEST"):
         Base.metadata.create_all(bind=engine)

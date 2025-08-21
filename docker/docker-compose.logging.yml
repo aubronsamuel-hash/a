@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  api:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+  proxy:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
