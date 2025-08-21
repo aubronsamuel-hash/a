@@ -83,6 +83,9 @@ def _auto_seed_admin() -> None:
             db.rollback()
 
 
+MAINT_ALLOW_PATHS = {"/healthz", "/livez", "/readyz", "/metrics"}
+
+
 def create_app() -> FastAPI:
     _setup_logging()
     Base.metadata.create_all(bind=engine)
@@ -113,6 +116,38 @@ def create_app() -> FastAPI:
             pass
         response.headers[req_hdr] = rid
         return response
+
+    # Maintenance Mode (503)
+    @app.middleware("http")
+    async def maintenance_mw(request: Request, call_next):
+        if settings.MAINTENANCE_MODE and request.url.path not in MAINT_ALLOW_PATHS:
+            logging.warning(
+                "Maintenance active - blocage requete", extra={"path": request.url.path}
+            )
+            return JSONResponse(
+                {"detail": "Maintenance en cours. Revenez plus tard."},
+                status_code=503,
+                headers={"Retry-After": str(settings.MAINTENANCE_RETRY_AFTER_SECONDS)},
+            )
+        return await call_next(request)
+
+    # Read-only Mode (423)
+    @app.middleware("http")
+    async def readonly_mw(request: Request, call_next):
+        if settings.READ_ONLY_MODE:
+            method = request.method.upper()
+            if method in {"POST", "PUT", "PATCH", "DELETE"} and not request.url.path.startswith(
+                "/auth/"
+            ):
+                logging.warning(
+                    "Lecture seule active - mutation bloquee",
+                    extra={"path": request.url.path},
+                )
+                return JSONResponse(
+                    {"detail": "Mode lecture seule actif. Operation interdite."},
+                    status_code=423,
+                )
+        return await call_next(request)
 
     # Global rate limit middleware
     @app.middleware("http")

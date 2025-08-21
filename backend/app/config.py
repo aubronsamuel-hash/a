@@ -53,5 +53,12 @@ class Settings:
     # Frontend build (SPA)
     FRONT_DIST_DIR: str = os.getenv("FRONT_DIST_DIR", "")
 
+    # Operations
+    MAINTENANCE_MODE: bool = os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
+    MAINTENANCE_RETRY_AFTER_SECONDS: int = int(
+        os.getenv("MAINTENANCE_RETRY_AFTER_SECONDS", "120")
+    )
+    READ_ONLY_MODE: bool = os.getenv("READ_ONLY_MODE", "false").lower() == "true"
+
 
 settings = Settings()
