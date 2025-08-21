@@ -19,7 +19,7 @@ python - <<'PY'
 import re,sys
 with open("backend/app/version.py","r",encoding="utf-8") as f:
     txt=f.read()
-m=re.search(r"version = ['"]([^'"]+)['"]",txt)
+m=re.search(r'''version = ['"]([^'"]+)['"]''', txt)
 assert m, "Version introuvable"
 print(m.group(1))
 PY
@@ -31,7 +31,7 @@ new=sys.argv[1]
 p=pathlib.Path("backend/app/version.py")
 p.write_text(re.sub(r"version = ['\"][^'\"]+['\"]", f"version = '{new}'", p.read_text()), encoding="utf-8")
 pp=pathlib.Path("backend/pyproject.toml")
-pp.write_text(re.sub(r'(^version = ")([^\"]+)(")', r'\1'+new+r'\3', pp.read_text(), flags=re.M), encoding="utf-8")
+pp.write_text(re.sub(r'(^version = ")([^\"]+)(")', lambda m: m.group(1)+new+m.group(3), pp.read_text(), flags=re.M), encoding="utf-8")
 PY
 }
 next_version() {
@@ -63,12 +63,13 @@ BEGIN{done=0}
 { print $0 }
 ' CHANGELOG.md > "$tmp" && mv "$tmp" CHANGELOG.md
 
-git add backend/app/version.py backend/pyproject.toml CHANGELOG.md
-git commit -m "chore(release): bump version to $next"
-
-if $TAG; then
-  git tag "v$next"
-  echo "Tag cree: v$next"
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git add backend/app/version.py backend/pyproject.toml CHANGELOG.md
+  git commit -m "chore(release): bump version to $next"
+  if $TAG; then
+    git tag "v$next"
+    echo "Tag cree: v$next"
+  fi
 fi
 
 if $BUILD_DOCKER; then
