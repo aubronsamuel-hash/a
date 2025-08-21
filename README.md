@@ -428,6 +428,22 @@ PYTHONPATH=backend pytest -W default::Warning -ra
 - Logs JSON (activables via `LOG_JSON=true`)
 - Prometheus : `GET /metrics`
 
+### Sante de l appli
+
+Endpoints:
+
+* `GET /livez` -> 200 si process up
+* `GET /readyz` -> 200 si DB OK (+ Redis si `READINESS_REQUIRE_REDIS=true`), sinon 503
+
+Scripts:
+
+```
+# Windows
+powershell -File PS1/health_check.ps1 http://localhost:8001
+# Bash
+bash scripts/bash/health_check.sh http://localhost:8001
+```
+
 ## Sécurité
 
 - JWT access/refresh, RBAC (admin/user)
