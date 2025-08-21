@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from .config import settings
 from .deps import get_current_user, get_db
 from .hash import hash_password, verify_password
-from .rate_limit import FixedWindowLimiter
+from .rate_limit import get_limiter
 from .repo_users import get_by_username
 from .schemas import ChangePasswordIn
 from .security import (
@@ -17,7 +17,7 @@ from .security import (
 )
 
 router = APIRouter()
-_auth_limiter = FixedWindowLimiter()
+_auth_limiter = get_limiter(settings.RATE_LIMIT_BACKEND, settings.REDIS_URL)
 
 
 class TokenOut(BaseModel):
