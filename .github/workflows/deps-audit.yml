@@ -1,0 +1,20 @@
+name: deps-audit
+on:
+  pull_request:
+    paths:
+      - "requirements*.txt"
+      - ".github/workflows/deps-audit.yml"
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pip-audit
+        run: pip install pip-audit==2.7.3
+      - name: Audit requirements
+        run: |
+          if [ -f requirements.txt ]; then pip-audit -r requirements.txt -l --progress-spinner=off --require-hashes=false --strict=false --policy pip-audit.toml; fi
+          if [ -f requirements-dev.txt ]; then pip-audit -r requirements-dev.txt -l --progress-spinner=off --require-hashes=false --strict=false --policy pip-audit.toml; fi

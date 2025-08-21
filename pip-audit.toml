@@ -1,0 +1,8 @@
+[tool.pip_audit]
+ignore-vulns = [
+
+# Exemple: CVE-XXXX-YYYY pour un paquet dev-only (adapter si necessaire)
+
+]
+require-hashes = false
+strict = false

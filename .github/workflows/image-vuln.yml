@@ -1,0 +1,28 @@
+name: image-vuln
+on:
+  pull_request:
+    paths:
+      - "Dockerfile*"
+      - ".github/workflows/image-vuln.yml"
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API Image (example)
+        run: |
+          echo "FROM python:3.11-slim" > Dockerfile.api.tmp
+          docker build -t app:test -f Dockerfile.api.tmp .
+      - name: Scan with Trivy
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: app:test
+          format: table
+          exit-code: '1'
+          severity: 'CRITICAL'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          skip-dirs: |
+            /usr/local/lib/python3.11/site-packages/pip
+          skip-files: |
+            /etc/ssl/certs/ca-certificates.crt
