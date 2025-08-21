@@ -375,6 +375,32 @@ Jobs :
 - `frontend` (npm ci, lint, test, build, smoke ETag cross-OS)
 - `openapi` (export openapi.json et artefact)
 
+## CI Stabilisation (CLI Docker & Observability)
+
+Les jobs CI ont ete renforces avec des retries et des logs detaillees en cas d echec.
+
+Observability utilise des versions pinnees: Prometheus v2.53.1, Grafana 11.2.0 pour eviter les surprises.
+
+Les cibles Prometheus sont verifiees avec retries jusqu a 90s pour couvrir les lenteurs reseau du runner.
+
+Scripts/Commandes de repro (si Docker dispo):
+
+```bash
+docker build -t ccapi:cli-ci .
+docker run --rm ccapi:cli-ci sh -lc "which ccadmin || true; ccadmin --help || python -m app.cli --help"
+docker volume create ccapi_cli_ci
+docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin list
+docker compose -f docker-compose.observability.yml up -d --build
+```
+
+Tests (PowerShell + Bash):
+
+```bash
+python -m ruff check backend
+python -m mypy backend
+PYTHONPATH=backend pytest -q --cov=backend -k "ci_smoke_guards"
+```
+
 ## Releases
 
 ### Tagger une version (Windows)
