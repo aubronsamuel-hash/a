@@ -1,0 +1,13 @@
+[run]
+# Mesurer uniquement le code applicatif; ignorer les tests.
+source = backend
+omit =
+    backend/tests/*
+    */__init__.py
+
+[report]
+show_missing = True
+skip_covered = True
+
+# Ne pas imposer de seuil ici pour ne pas casser la CI tant que la policy est recente.
+# fail_under = 90
