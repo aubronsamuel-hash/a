@@ -133,6 +133,24 @@ bash scripts/bash/compose_up_redis.sh
 bash scripts/bash/smoke_rate_limit_redis.sh
 ```
 
+### Docker (image unique)
+
+Build et run locaux:
+
+```
+# Windows
+.\PS1\docker_build.ps1
+.\PS1\docker_run.ps1
+.\PS1\docker_smoke.ps1
+
+# Linux/mac
+bash scripts/bash/docker_build.sh
+bash scripts/bash/docker_run.sh
+bash scripts/bash/docker_smoke.sh
+```
+
+L'image sert l'API (`/healthz`) et le SPA sur `/` (FRONT_DIST_DIR=/app/public).
+
 ## Back-end (FastAPI)
 
 Base URL: `http://localhost:8001`

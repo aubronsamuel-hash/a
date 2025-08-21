@@ -1,0 +1,10 @@
+.git
+.github
+web/node_modules
+**pycache**
+*.pyc
+.venv
+.env
+dist
+coverage
+*.log
