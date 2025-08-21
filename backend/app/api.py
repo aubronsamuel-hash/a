@@ -53,7 +53,7 @@ def _redis_ready() -> bool:
             return True
         from urllib.parse import urlparse
 
-        import redis  # type: ignore
+        import redis
 
         url = urlparse(settings.REDIS_URL)
         client = redis.Redis(

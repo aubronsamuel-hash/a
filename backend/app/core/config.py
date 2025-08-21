@@ -3,10 +3,10 @@ from functools import lru_cache
 from typing import List
 
 try:
-    from dotenv import load_dotenv, dotenv_values  # type: ignore
+    from dotenv import load_dotenv, dotenv_values
 except Exception:  # pragma: no cover
-    load_dotenv = None  # type: ignore
-    dotenv_values = None  # type: ignore
+    load_dotenv = None  # type: ignore[assignment]
+    dotenv_values = None  # type: ignore[assignment]
 
 
 def _split_csv(value: str) -> List[str]:
@@ -24,14 +24,14 @@ def _load_env_chain() -> None:
     if os.path.exists(".env"):
         for k, v in dotenv_values(".env").items():
             if k not in os.environ:
-                os.environ[k] = v
+                os.environ[k] = v or ""
                 loaded_keys.add(k)
     env = os.getenv("ENV", "dev").lower()
     env_file = f".env.{env}"
     if os.path.exists(env_file):
         for k, v in dotenv_values(env_file).items():
             if k not in os.environ or k in loaded_keys:
-                os.environ[k] = v
+                os.environ[k] = v or ""
 
 
 class Settings:
@@ -91,6 +91,6 @@ def get_settings() -> 'Settings':
 
 def reset_settings_cache() -> None:
     try:
-        get_settings.cache_clear()  # type: ignore[attr-defined]
+        get_settings.cache_clear()
     except Exception:
         pass

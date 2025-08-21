@@ -1,0 +1,22 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E","F","W","I","N","UP","B","C4","T20"]
+ignore = ["E203","E266","E501","B905"]
+exclude = ["docs","site",".venv","build","dist","scripts/bash","scripts/ps1"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["backend"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_ignores = true
+no_implicit_optional = true
+strict_optional = true
+check_untyped_defs = false
+disallow_untyped_defs = false
+exclude = "(^|/)(docs|site|.venv|build|dist|scripts|backend/tests)/"
+
+[tool.mypy-backend]
+module = "backend.*"
