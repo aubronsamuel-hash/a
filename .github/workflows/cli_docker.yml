@@ -1,0 +1,44 @@
+name: CLI in Docker
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "Dockerfile"
+      - "scripts/bash/docker_ccadmin.sh"
+      - "PS1/docker_ccadmin.ps1"
+      - ".github/workflows/cli_docker.yml"
+  push:
+    branches: [ main ]
+
+jobs:
+  cli-docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        run: docker build -t ccapi:cli-ci .
+      - name: Prepare shared volume
+        run: docker volume create ccapi_cli_ci
+      - name: CLI list (should succeed)
+        run: docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin list
+      - name: CLI create user (first should succeed)
+        run: |
+          docker run --rm -e DB_DSN="sqlite:////data/cc.db" \
+            -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin create --username ciuser --password pw
+      - name: CLI create duplicate (should fail exit code 1)
+        run: |
+          set +e
+          docker run --rm -e DB_DSN="sqlite:////data/cc.db" \
+            -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin create --username ciuser --password pw
+          rc=$?
+          echo "rc=$rc"
+          test "$rc" -eq 1
+      - name: CLI promote user (should succeed)
+        run: |
+          docker run --rm -e DB_DSN="sqlite:////data/cc.db" \
+            -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin promote --username ciuser
+      - name: Summary
+        run: echo "CLI Docker tests OK" >> $GITHUB_STEP_SUMMARY
