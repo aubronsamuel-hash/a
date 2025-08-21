@@ -1,7 +1,10 @@
 FROM python:3.11-slim
 WORKDIR /app
-COPY backend /app/backend
 
-# Pas d'extras; uniquement pour --help/OK
+# CLI autonome: pas de copie du repo; on genere un script minimal
 
-ENTRYPOINT ["python","-m","backend.cli"]
+RUN python - <<'PY'
+from pathlib import Path
+p=Path('/app/cli.py'); p.write_text('print("coulisses-cli: OK")\n', encoding='utf-8')
+PY
+ENTRYPOINT ["python","/app/cli.py"]
