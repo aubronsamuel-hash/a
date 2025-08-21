@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+# Charger un flag eventuel place par e2e_setup.sh (offline local)
+if [ -f .e2e_skip.env ]; then source .e2e_skip.env; fi
+if [ "${E2E_SKIP:-0}" = "1" ] && [ "${CI:-}" != "true" ]; then
+  echo "E2E SKIP (local, navigateurs indisponibles)."
+  exit 0
+fi
+
 : "${APP_ENV:=ci}"
 : "${ADMIN_AUTOSEED:=true}"
 : "${ADMIN_USERNAME:=admin}"
@@ -24,19 +32,17 @@ if [ -n "$CHROME" ]; then
   export CHROMIUM_EXECUTABLE="$CHROME"
 fi
 
-# Si aucun navigateur et pas telecharge: tenter install; sinon SKIP local
+# Sinon tenter install une fois (local: degrade en skip ; CI: fail)
 if [ -z "${CHROMIUM_EXECUTABLE:-}" ]; then
   if ! npx playwright browsers ls | grep -qi chromium; then
-    set +e
-    npx playwright install chromium
-    rc=$?
-    set -e
-    if [ $rc -ne 0 ] && [ "${CI:-}" != "true" ]; then
-      echo "Aucun navigateur et installation impossible -> E2E SKIP local." >&2
-      export E2E_SKIP=1
-    elif [ $rc -ne 0 ]; then
-      echo "Installation navigateurs impossible en CI -> FAIL." >&2
-      exit 1
+    if ! npx playwright install chromium; then
+      if [ "${CI:-}" = "true" ]; then
+        echo "Installation navigateurs impossible en CI -> FAIL." >&2
+        exit 1
+      else
+        echo "Aucun navigateur et installation impossible -> E2E SKIP local." >&2
+        exit 0
+      fi
     fi
   fi
 fi

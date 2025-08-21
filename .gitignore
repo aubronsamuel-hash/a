@@ -7,6 +7,7 @@
 *.egg-info/
 .venv/
 .env
+.e2e_skip.env
 .coverage
 htmlcov/
 .pytest_cache/
@@ -22,3 +23,4 @@ build/
 
 web/node_modules/
 web/dist/
+web/coverage/
