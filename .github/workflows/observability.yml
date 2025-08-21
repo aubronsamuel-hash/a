@@ -19,18 +19,29 @@ jobs:
       - uses: docker/setup-buildx-action@v3
       - name: Compose up
         run: docker compose -f docker-compose.observability.yml up -d --build
-      - name: Wait backend
+      - name: Wait backend health (compose healthcheck)
         run: |
           for i in $(seq 1 60); do
+            st=$(docker inspect --format='{{json .State.Health.Status}}' $(docker ps -q --filter "name=_backend_1") 2>/dev/null || echo '"starting"')
+            echo "backend health: $st"
+            [ "$st" = '"healthy"' ] && break
+            sleep 2
+          done
+      - name: Ensure /healthz responds 200
+        run: |
+          for i in $(seq 1 30); do
             code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/healthz || true)
             [ "$code" = "200" ] && break
             sleep 1
           done
-          [ "${code:-0}" = "200" ] || (docker compose -f docker-compose.observability.yml logs --no-color && exit 1)
+          [ "${code:-0}" = "200" ]
       - name: Prometheus targets include ccapi
         run: |
           curl -fsS http://localhost:9090/-/ready >/dev/null
           curl -fsS http://localhost:9090/api/v1/targets | grep -q '"job":"ccapi"'
+      - name: Compose logs (on failure)
+        if: failure()
+        run: docker compose -f docker-compose.observability.yml logs --no-color
       - name: Compose down
         if: always()
         run: docker compose -f docker-compose.observability.yml down -v

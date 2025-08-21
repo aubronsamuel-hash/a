@@ -40,5 +40,9 @@ jobs:
         run: |
           docker run --rm -e DB_DSN="sqlite:////data/cc.db" \
             -v ccapi_cli_ci:/data ccapi:cli-ci ccadmin promote --username ciuser
-      - name: Summary
-        run: echo "CLI Docker tests OK" >> $GITHUB_STEP_SUMMARY
+      - name: Debug info on failure
+        if: failure()
+        run: |
+          docker images
+          docker volume ls
+          echo "No compose logs to show for CLI job."
