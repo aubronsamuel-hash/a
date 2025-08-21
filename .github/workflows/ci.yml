@@ -79,8 +79,10 @@ DB_DSN=sqlite:///./cc.db
         run: |
           if command -v pwsh >/dev/null 2>&1; then
             pwsh -File PS1/web_users_smoke.ps1
+          elif command -v powershell >/dev/null 2>&1; then
+            powershell -File PS1/web_users_smoke.ps1
           else
-            powershell.exe -File PS1/web_users_smoke.ps1
+            bash scripts/bash/web_users_smoke.sh
           fi
   compose_smoke:
     runs-on: ubuntu-latest
@@ -157,12 +159,47 @@ DB_DSN=sqlite:///./cc.db
       - name: Install deps
         working-directory: web
         run: npm ci
-      - name: Lint and test (PowerShell)
+      - name: Lint
+        working-directory: web
+        run: npm run lint
+      - name: Test
+        working-directory: web
+        run: npm test
+      - name: Backend (API) minimal pour smoke front
+        uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: "pip" }
+      - name: Prepare API (SQLite)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e backend[dev]
+          echo "APP_ENV=ci" >> .env
+          echo "APP_LOG_LEVEL=info" >> .env
+          echo "ADMIN_AUTOSEED=true" >> .env
+          echo "ADMIN_USERNAME=admin" >> .env
+          echo "ADMIN_PASSWORD=admin123" >> .env
+          echo "JWT_SECRET=ci-secret" >> .env
+          echo "JWT_ALGO=HS256" >> .env
+          echo "JWT_TTL_SECONDS=3600" >> .env
+          echo "CORS_ORIGINS=http://localhost:3000,http://localhost:5173" >> .env
+          echo "DB_DSN=sqlite:///./cc.db" >> .env
+      - name: Start API in background
+        run: |
+          python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8001 &
+          sleep 5
+          code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/healthz)
+          echo "HTTP=$code"
+          test "$code" = "200"
+      - name: Front smoke (cross-OS)
         run: |
           if command -v pwsh >/dev/null 2>&1; then
+            pwsh -File PS1/web_users_smoke.ps1
             pwsh -File PS1/web_test.ps1
+          elif command -v powershell >/dev/null 2>&1; then
+            powershell -File PS1/web_users_smoke.ps1
+            powershell -File PS1/web_test.ps1
           else
-            powershell.exe -File PS1/web_test.ps1
+            bash scripts/bash/web_users_smoke.sh
+            bash scripts/bash/web_test.sh
           fi
       - name: Build
         working-directory: web
