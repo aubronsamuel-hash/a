@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import time
-from typing import Protocol
+from typing import Any, Protocol, cast
 
 try:
-    import redis  # type: ignore
+    import redis
 except Exception:  # pragma: no cover - optional dependency
-    redis = None  # type: ignore
+    redis = cast(Any, None)
 
 
 class Limiter(Protocol):
@@ -36,7 +36,7 @@ class InMemoryFixedWindowLimiter:
 class RedisFixedWindowLimiter:
     """Redis-based fixed-window limiter using INCR/EXPIRE."""
 
-    def __init__(self, client) -> None:  # type: ignore[no-untyped-def]
+    def __init__(self, client: Any) -> None:
         self.client = client
 
     def allow(self, key: str, max_calls: int, window_seconds: int) -> tuple[bool, int, int]:

@@ -5,6 +5,7 @@ import json
 import logging
 from datetime import UTC, datetime
 from logging import Formatter, LogRecord, StreamHandler
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
@@ -13,6 +14,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from starlette.responses import JSONResponse, Response
+from starlette.staticfiles import StaticFiles
 
 from .api import router as api_router
 from .auth import router as auth_router
@@ -41,9 +43,9 @@ class JsonFormatter(Formatter):
         if rid:
             payload["request_id"] = rid
         if hasattr(record, "path"):
-            payload["path"] = record.path  # type: ignore[attr-defined]
+            payload["path"] = record.path
         if hasattr(record, "status_code"):
-            payload["status"] = record.status_code  # type: ignore[attr-defined]
+            payload["status"] = record.status_code
         return json.dumps(payload, ensure_ascii=True)
 
 
@@ -66,7 +68,7 @@ def _auto_seed_admin() -> None:
         u = get_by_username(db, settings.ADMIN_USERNAME)
         if u:
             if getattr(u, "role", "user") != "admin":
-                u.role = "admin"  # type: ignore[attr-defined]
+                u.role = "admin"
                 db.add(u)
             return
         try:
@@ -140,8 +142,8 @@ def create_app() -> FastAPI:
         rec = logging.getLogger().makeRecord(
             name="app", level=logging.INFO, fn="", lno=0, msg="response", args=(), exc_info=None
         )
-        rec.path = request.url.path  # type: ignore[attr-defined]
-        rec.status_code = getattr(response, "status_code", 0)  # type: ignore[attr-defined]
+        rec.path = request.url.path
+        rec.status_code = getattr(response, "status_code", 0)
         logging.getLogger().handle(rec)
         return response
 
@@ -168,6 +170,11 @@ def create_app() -> FastAPI:
     app.include_router(users_router)
 
     Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
+    if settings.FRONT_DIST_DIR:
+        dist = Path(settings.FRONT_DIST_DIR).resolve()
+        if dist.exists() and dist.is_dir():
+            app.mount("/", StaticFiles(directory=str(dist), html=True), name="spa")
 
     return app
 
