@@ -9,10 +9,11 @@ from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
-from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy.exc import IntegrityError
 from starlette.responses import JSONResponse, Response
 from starlette.staticfiles import StaticFiles
+from .core.config import get_settings as get_core_settings
+from .metrics import setup_metrics
 from .logging_setup import setup_logging_from_env, get_logger
 
 from .api import router as api_router
@@ -203,7 +204,11 @@ def create_app() -> FastAPI:
         ]
         return {k: os.getenv(k) for k in keys}
 
-    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
+    get_core_settings.cache_clear()
+    core_settings = get_core_settings()
+    if core_settings.METRICS_ENABLED:
+        setup_metrics(app, endpoint=core_settings.METRICS_PATH)
 
     if settings.FRONT_DIST_DIR:
         dist = Path(settings.FRONT_DIST_DIR).resolve()
