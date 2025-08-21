@@ -106,14 +106,32 @@ Fichier `.env` à la racine. Voir `.env.example` fourni. Points clés:
 - `PS1\web_test.ps1` : lint + tests front
 - `PS1\web_users_smoke.ps1` : vérifie ETag/304 sur `/users`
 - `PS1\smoke_rate_limit.ps1` : vérifie 401 puis 429 sur `/auth/token`
+> Sur Windows sans PowerShell Core (`pwsh`), utilisez `powershell -File PS1\*.ps1`
 
 ### Bash (Linux/mac)
 
 - `scripts/bash/alembic_upgrade.sh`
 - `scripts/bash/web_setup.sh`, `web_run.sh`, `web_test.sh`
 - `scripts/bash/web_users_smoke.sh` (nécessite admin seed)
-- `scripts/bash/smoke_rate_limit.sh`
+- `scripts/bash/compose_up_redis.sh` (Docker Redis; message info si absent)
+- `scripts/bash/smoke_rate_limit_redis.sh` (401 puis 429 via Redis)
+- `scripts/bash/smoke_rate_limit.sh` (fallback mémoire)
 - `scripts/bash/api_start_autoseed.sh` (helper: API + autoseed rapide)
+
+#### Redis (optionnel)
+
+Sans Docker:
+
+```bash
+bash scripts/bash/smoke_rate_limit.sh
+```
+
+Avec Docker:
+
+```bash
+bash scripts/bash/compose_up_redis.sh
+bash scripts/bash/smoke_rate_limit_redis.sh
+```
 
 ## Back-end (FastAPI)
 
@@ -183,7 +201,7 @@ Jobs :
 
 - Lint Python : `python -m ruff check backend`
 - Typage : `python -m mypy backend`
-- Tests Python : `pytest -q --cov=backend`
+- Tests Python : `PYTHONPATH=backend pytest -q --cov=backend`
 - Lint/Test Web : `npm run lint`, `npm test` dans `web/`
 - Smoke : voir [Scripts utiles](#scripts-utiles)
 
