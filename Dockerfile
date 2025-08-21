@@ -1,5 +1,10 @@
 # syntax=docker/dockerfile:1.7
 
+# NOTE: ccadmin est deja disponible car `pip install -e backend` installe la console-script.
+# Usage:
+# docker run --rm ccapi:local ccadmin list
+# docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v ccapi_cli_data:/data ccapi:local ccadmin create --username alice --password pw
+
 # Stage 1: build front
 FROM node:20-alpine AS webbuild
 WORKDIR /web

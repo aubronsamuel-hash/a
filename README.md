@@ -184,6 +184,47 @@ OU via entrypoint Python si installé:
 ccadmin list
 ```
 
+### CLI Admin via Docker
+
+Sans Python local:
+
+```
+# Linux/mac
+bash scripts/bash/docker_ccadmin.sh list
+bash scripts/bash/docker_ccadmin.sh create --username alice --password pw
+bash scripts/bash/docker_ccadmin.sh promote --username alice
+bash scripts/bash/docker_ccadmin.sh reset-password --username alice --new-password newpw
+```
+
+Persistance DB entre commandes dans un volume: `ccapi_cli_data`.
+Équivalent brut:
+
+```
+docker run --rm -e DB_DSN="sqlite:////data/cc.db" -v ccapi_cli_data:/data ccapi:local ccadmin list
+```
+
+Windows (PowerShell):
+
+```
+./PS1/docker_ccadmin.ps1 -Command list
+./PS1/docker_ccadmin.ps1 -Command create -Username alice -Password pw
+```
+
+#### Tests (PowerShell + Bash)
+
+```
+# Linux/mac
+bash scripts/bash/docker_ccadmin.sh list
+bash scripts/bash/docker_ccadmin.sh create --username alice --password pw
+bash scripts/bash/docker_ccadmin.sh create --username alice --password pw && echo "DOIT ECHOUER" || echo "OK (exit 1 attendu)"
+bash scripts/bash/docker_ccadmin.sh promote --username alice
+
+# Windows
+powershell -File PS1/docker_ccadmin.ps1 -Command list
+powershell -File PS1/docker_ccadmin.ps1 -Command create -Username alice -Password pw
+powershell -File PS1/docker_ccadmin.ps1 -Command promote -Username alice
+```
+
 ## Back-end (FastAPI)
 
 Base URL: `http://localhost:8001`
