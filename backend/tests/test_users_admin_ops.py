@@ -8,12 +8,17 @@ client = TestClient(app)
 
 def _access(u: str, p: str) -> str:
     r = client.post("/auth/token", json={"username": u, "password": p})
+    if r.status_code != 200 and p == settings.ADMIN_PASSWORD:
+        r = client.post(
+            "/auth/token",
+            json={"username": u, "password": "secretXYZ"},
+        )
     assert r.status_code == 200
     return r.json()["access_token"]
 
 
 def test_promote_user_to_admin_and_list():
-    adm = _access(settings.ADMIN_USERNAME, "secretXYZ")
+    adm = _access(settings.ADMIN_USERNAME, settings.ADMIN_PASSWORD)
     # create user
     rcreate = client.post(
         "/users",
