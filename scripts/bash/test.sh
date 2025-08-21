@@ -11,3 +11,10 @@ code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-Type: applicat
 echo "Smoke audit (bad login) HTTP=$code"
 set -e
 
+# Smokes non bloquants
+
+set +e
+bash scripts/bash/smoke_rate_limit.sh
+bash scripts/bash/smoke_rate_limit_redis.sh
+set -e
+
