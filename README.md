@@ -386,22 +386,41 @@ bash scripts/bash/compose_down_postgres.sh
 - Lint/Test Web : `npm run lint`, `npm test` dans `web/`
 - Smoke : voir [Scripts utiles](#scripts-utiles)
 
-### Couverture & Warnings (Pytest)
+### Seuil de couverture et politique des warnings
 
-* La couverture reporte maintenant UNIQUEMENT le code applicatif (`backend/app/**`, etc.) grâce à `.coveragerc`.
-* Les fichiers de tests sont exclus du calcul (plus de % bas sur `backend/tests/**`).
-* Les warnings des libs (SQLAlchemy, Pydantic...) sont filtrés via `pytest.ini`.
-  Pour voir tous les warnings:
-
-  ```
-  pytest -W default::Warning -ra
-  ```
-
-  Pour un rapport de couverture détaillé des lignes manquantes:
+* Couverture minimale imposée: `fail_under = 90` (uniquement code applicatif).
+* Les `DeprecationWarning`/`FutureWarning` provenant de `app.*` échouent les tests (anticipation des maj).
+* Pour afficher tous les warnings (diagnostic):
 
   ```
-  pytest -q --cov=backend --cov-report=term-missing
+  PYTHONPATH=backend pytest -W default::Warning -ra
   ```
+
+* Pour un rapport de couverture détaillé:
+
+  ```
+  PYTHONPATH=backend pytest -q --cov=backend --cov-report=term-missing
+  ```
+
+### Scripts PowerShell/tests rapides
+
+```powershell
+powershell -NoLogo -NoProfile -Command "python -m ruff check backend; python -m mypy backend; $env:PYTHONPATH='backend'; pytest -q --cov=backend"
+
+# Diagnostic warnings complet (optionnel)
+powershell -NoLogo -NoProfile -Command "$env:PYTHONPATH='backend'; pytest -W default::Warning -ra"
+```
+
+### Scripts Bash/tests rapides
+
+```bash
+PYTHONPATH=backend python -m ruff check backend
+PYTHONPATH=backend python -m mypy backend
+PYTHONPATH=backend pytest -q --cov=backend
+
+# Diagnostic warnings (optionnel)
+PYTHONPATH=backend pytest -W default::Warning -ra
+```
 
 ## Observabilité
 
