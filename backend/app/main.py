@@ -19,7 +19,7 @@ from .auth import router as auth_router
 from .config import settings
 from .db import Base, engine, session_scope
 from .hash import hash_password
-from .rate_limit import FixedWindowLimiter
+from .rate_limit import get_limiter
 from .repo_users import create_user, get_by_username
 from .security_headers import SecurityHeadersMiddleware
 from .users_api import router as users_router
@@ -27,7 +27,7 @@ from .users_api import router as users_router
 _request_id_ctx: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "request_id", default=None
 )
-_global_limiter = FixedWindowLimiter()
+_global_limiter = get_limiter(settings.RATE_LIMIT_BACKEND, settings.REDIS_URL)
 
 
 class JsonFormatter(Formatter):

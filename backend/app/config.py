@@ -47,6 +47,8 @@ class Settings:
     RATE_LIMIT_AUTH_WINDOW_SECONDS: int = int(
         os.getenv("RATE_LIMIT_AUTH_WINDOW_SECONDS", "60")
     )
+    RATE_LIMIT_BACKEND: str = os.getenv("RATE_LIMIT_BACKEND", "memory")
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 
 settings = Settings()

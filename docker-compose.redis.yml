@@ -1,0 +1,20 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server","--appendonly","no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+
+  backend:
+    environment:
+      RATE_LIMIT_BACKEND: "redis"
+      REDIS_URL: "redis://redis:6379/0"
+    depends_on:
+      redis:
+        condition: service_healthy
+
