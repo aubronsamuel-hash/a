@@ -25,7 +25,9 @@ from .hash import hash_password
 from .rate_limit import get_limiter
 from .repo_users import create_user, get_by_username
 from .security_headers import SecurityHeadersMiddleware
+from .middleware_features import FeaturesHeaderMiddleware
 from .users_api import router as users_router
+from .routes_features import router as features_router
 
 _request_id_ctx: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "request_id", default=None
@@ -115,6 +117,7 @@ def create_app() -> FastAPI:
         )
 
     app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(FeaturesHeaderMiddleware)
 
     # Request ID middleware
     @app.middleware("http")
@@ -203,6 +206,7 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
     app.include_router(users_router)
     app.include_router(audit_router)
+    app.include_router(features_router)
 
     Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
