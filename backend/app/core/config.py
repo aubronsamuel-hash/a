@@ -47,6 +47,8 @@ class Settings:
         self.JWT_SECRET: str = os.getenv("JWT_SECRET", "change_me")
         self.JWT_ALGO: str = os.getenv("JWT_ALGO", "HS256")
         self.JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "60"))
+        self.METRICS_ENABLED: bool = os.getenv("METRICS_ENABLED", "1").lower() in ("1", "true", "yes")
+        self.METRICS_PATH: str = os.getenv("METRICS_PATH", "/metrics")
 
 
 @lru_cache
