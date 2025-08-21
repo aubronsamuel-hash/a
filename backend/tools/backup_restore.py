@@ -39,7 +39,7 @@ def backup(dsn: Optional[str], out_file: Path) -> None:
             src.backup(dst)
         return
 
-    if dsnv.startswith("postgresql"):
+    if dsnv.startswith("postgresql"):  # pragma: no cover
         if shutil.which("pg_dump") is None:
             raise RuntimeError(
                 "pg_dump non trouve dans le PATH. Installez les outils Postgres pour utiliser le backup Postgres."
@@ -76,7 +76,7 @@ def restore(dsn: Optional[str], dump_file: Path, overwrite: bool = False) -> Non
         shutil.copy2(dump_file, db_path)
         return
 
-    if dsnv.startswith("postgresql"):
+    if dsnv.startswith("postgresql"):  # pragma: no cover
         if shutil.which("pg_restore") is None or shutil.which("psql") is None:
             raise RuntimeError(
                 "pg_restore/psql non trouves dans le PATH. Installez les outils Postgres pour utiliser le restore Postgres."
