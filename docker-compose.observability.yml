@@ -9,7 +9,8 @@ services:
     ports:
       - "8001:8001"
     healthcheck:
-      test: ["CMD","curl","-fsS","http://localhost:8001/healthz"]
+      # Avoid curl/wget dependency; use Python available in image
+      test: ["CMD-SHELL","python - <<'PY'\nimport sys,urllib.request\ntry:\n  with urllib.request.urlopen('http://localhost:8001/healthz', timeout=2) as r:\n    sys.exit(0 if r.status==200 else 1)\nexcept Exception:\n  sys.exit(1)\nPY"]
       interval: 5s
       timeout: 3s
       retries: 20

@@ -22,8 +22,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e backend[dev]
       - name: Alembic upgrade head (SQLite)
-        run: |
-          PYTHONPATH=backend alembic upgrade head
+        run: PYTHONPATH=backend alembic upgrade head
       - name: Pytests migrations smoke
+        run: PYTHONPATH=backend pytest -q -k "migrations_smoke"
+      - name: Env debug (on failure)
+        if: failure()
         run: |
-          PYTHONPATH=backend pytest -q -k "migrations_smoke"
+          python --version
+          pip list
