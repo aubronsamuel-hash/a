@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from .config import settings
 from .deps import get_current_user, get_db
 from .hash import hash_password, verify_password
+from .rate_limit import FixedWindowLimiter
 from .repo_users import get_by_username
 from .schemas import ChangePasswordIn
 from .security import (
@@ -15,6 +17,7 @@ from .security import (
 )
 
 router = APIRouter()
+_auth_limiter = FixedWindowLimiter()
 
 
 class TokenOut(BaseModel):
@@ -28,8 +31,26 @@ class LoginIn(BaseModel):
     password: str
 
 
+def _auth_rl_check(ip: str) -> None:
+    if not settings.RATE_LIMIT_ENABLE:
+        return
+    ok, _remaining, reset_in = _auth_limiter.allow(
+        key=f"auth:{ip}",
+        max_calls=settings.RATE_LIMIT_AUTH_MAX,
+        window_seconds=settings.RATE_LIMIT_AUTH_WINDOW_SECONDS,
+    )
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Trop de tentatives. Reessayez plus tard.",
+            headers={"Retry-After": str(reset_in)},
+        )
+
+
 @router.post("/auth/token", response_model=TokenOut, tags=["auth"])
-def login(form: LoginIn, db: Session = Depends(get_db)) -> TokenOut:  # noqa: B008
+def login(request: Request, form: LoginIn, db: Session = Depends(get_db)) -> TokenOut:  # noqa: B008
+    ip = request.client.host if request.client else "unknown"
+    _auth_rl_check(ip)
     user = get_by_username(db, form.username)
     if not user or not verify_password(form.password, user.password_hash):
         raise HTTPException(

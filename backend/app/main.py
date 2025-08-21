@@ -19,12 +19,15 @@ from .auth import router as auth_router
 from .config import settings
 from .db import Base, engine, session_scope
 from .hash import hash_password
+from .rate_limit import FixedWindowLimiter
 from .repo_users import create_user, get_by_username
+from .security_headers import SecurityHeadersMiddleware
 from .users_api import router as users_router
 
 _request_id_ctx: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "request_id", default=None
 )
+_global_limiter = FixedWindowLimiter()
 
 
 class JsonFormatter(Formatter):
@@ -94,6 +97,8 @@ def create_app() -> FastAPI:
             allow_headers=["*"],
         )
 
+    app.add_middleware(SecurityHeadersMiddleware)
+
     # Request ID middleware
     @app.middleware("http")
     async def request_id_mw(request: Request, call_next):  # noqa: D401 - middleware
@@ -106,6 +111,24 @@ def create_app() -> FastAPI:
             pass
         response.headers[req_hdr] = rid
         return response
+
+    # Global rate limit middleware
+    @app.middleware("http")
+    async def rate_limit_global_mw(request: Request, call_next):  # noqa: D401 - middleware
+        if settings.RATE_LIMIT_ENABLE:
+            ip = request.client.host if request.client else "unknown"
+            ok, _remaining, reset_in = _global_limiter.allow(
+                key=f"global:{ip}",
+                max_calls=settings.RATE_LIMIT_GLOBAL_MAX,
+                window_seconds=settings.RATE_LIMIT_GLOBAL_WINDOW_SECONDS,
+            )
+            if not ok:
+                return JSONResponse(
+                    {"detail": "Trop de requetes. Reessayez plus tard."},
+                    status_code=429,
+                    headers={"Retry-After": str(reset_in)},
+                )
+        return await call_next(request)
 
     # Logging middleware
     @app.middleware("http")
