@@ -1,0 +1,33 @@
+{
+  "title": "API Availability (Blackbox)",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Probe Success",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "probe_success{job=\"blackbox_api\"}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP p95 Duration (s)",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(probe_http_duration_seconds_bucket{job=\"blackbox_api\"}[5m])) by (le))" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Status Codes",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum by (status_code)(rate(probe_http_status_code{job=\"blackbox_api\"}[5m]))" }
+      ]
+    }
+  ]
+}
