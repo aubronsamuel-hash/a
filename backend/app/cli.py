@@ -49,7 +49,7 @@ def cmd_promote(args: argparse.Namespace) -> int:
         if not u:
             _json_out({"error": "Utilisateur introuvable"})
             return ERR
-        u.role = "admin"  # type: ignore[attr-defined]
+        u.role = "admin"
         db.add(u)
         _json_out({"promoted": {"username": u.username, "role": "admin"}})
     return OK
