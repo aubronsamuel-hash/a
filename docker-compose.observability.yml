@@ -13,10 +13,10 @@ services:
       test: ["CMD-SHELL","python - <<'PY'\nimport sys,urllib.request\ntry:\n  with urllib.request.urlopen('http://localhost:8001/healthz', timeout=2) as r:\n    sys.exit(0 if r.status==200 else 1)\nexcept Exception:\n  sys.exit(1)\nPY"]
       interval: 5s
       timeout: 3s
-      retries: 20
+      retries: 30
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.53.1
     depends_on:
       backend:
         condition: service_healthy
@@ -28,7 +28,7 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
 
   grafana:
-    image: grafana/grafana-oss:latest
+    image: grafana/grafana-oss:11.2.0
     depends_on:
       prometheus:
         condition: service_started
