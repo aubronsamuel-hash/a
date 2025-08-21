@@ -30,6 +30,7 @@ from .cors_config import CorsSettings
 from .middleware_features import FeaturesHeaderMiddleware
 from .users_api import router as users_router
 from .routes_features import router as features_router
+from .routers.protected import router as protected_router
 
 _request_id_ctx: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "request_id", default=None
@@ -213,6 +214,7 @@ def create_app() -> FastAPI:
     app.include_router(users_router)
     app.include_router(audit_router)
     app.include_router(features_router)
+    app.include_router(protected_router)
 
     @app.get("/_meta/scaling")
     def scaling_meta():  # noqa: D401 - expose current scaling env vars
