@@ -1,0 +1,34 @@
+site_name: "Coulisses Crew Docs"
+site_description: "Documentation produit, technique et operations"
+site_url: "https://example.github.io/coulisses-crew"  # ajuster
+repo_url: "https://github.com/example/coulisses-crew"  # ajuster
+nav:
+  - Accueil: index.md
+  - Guide:
+      - Demarrage: getting-started.md
+  - Backend:
+      - API: backend/api.md
+  - Ops:
+      - Monitoring: ops/monitoring.md
+  - ADR:
+      - Template: adr/0000-template.md
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - content.code.copy
+    - toc.integrate
+plugins:
+  - search
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+# Evite d embarquer des fichiers non docs
+exclude_docs: |
+  **/node_modules/**
+  **/.venv/**
