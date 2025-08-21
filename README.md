@@ -354,28 +354,23 @@ DRYRUN=1 bash scripts/bash/release_tag.sh 1.0.1
 ## Tests (PowerShell + curl)
 
 ```
-# Lints/typing/tests unitaires
+# Unitaires backend
 
 python -m ruff check backend
 python -m mypy backend
-pytest -q --cov=backend
+PYTHONPATH=backend pytest -q --cov=backend -k "metrics_exposed or health or readiness"
 
-# Compose Postgres (Windows)
+# Smoke Docker (si Docker dispo)
 
-.\PS1\compose_up_postgres.ps1
-.\PS1\smoke_postgres_api.ps1
+powershell -File PS1\observability_up.ps1
+powershell -File PS1\observability_smoke.ps1
+powershell -File PS1\observability_down.ps1
 
-# CLI dans conteneur (si host.docker.internal resolu)
+# Bash equivalent
 
-.\PS1\smoke_postgres_cli.ps1
-.\PS1\compose_down_postgres.ps1
-
-# Compose Postgres (Bash)
-
-bash scripts/bash/compose_up_postgres.sh
-bash scripts/bash/smoke_postgres_api.sh
-bash scripts/bash/smoke_postgres_cli.sh
-bash scripts/bash/compose_down_postgres.sh
+bash scripts/bash/observability_up.sh
+bash scripts/bash/observability_smoke.sh
+bash scripts/bash/observability_down.sh
 ```
 
 ## Tests et Qualité
@@ -427,6 +422,31 @@ PYTHONPATH=backend pytest -W default::Warning -ra
 - Header `X-Request-ID` (propagation auto)
 - Logs JSON (activables via `LOG_JSON=true`)
 - Prometheus : `GET /metrics`
+
+### Observabilité (Prometheus + Grafana)
+
+Lancer localement:
+
+```
+# Windows
+.\PS1\observability_up.ps1
+.\PS1\observability_smoke.ps1
+# Linux/mac
+bash scripts/bash/observability_up.sh
+bash scripts/bash/observability_smoke.sh
+```
+
+Arrêter:
+
+```
+# Windows
+.\PS1\observability_down.ps1
+# Linux/mac
+bash scripts/bash/observability_down.sh
+```
+
+* Prometheus: http://localhost:9090
+* Grafana: http://localhost:3000 (admin/admin). Dashboard: "CCAPI - Overview".
 
 ### Sante de l appli
 
