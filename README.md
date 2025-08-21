@@ -17,6 +17,7 @@ Monorepo FastAPI (backend) + React Vite (frontend). Windows-first (PowerShell), 
 - [Sans Docker](#sans-docker)
 - [CI GitHub Actions](#ci-github-actions)
 - [Releases](#releases)
+- [Tests (PowerShell + curl)](#tests-powershell--curl)
 - [Tests et Qualité](#tests-et-qualite)
 - [Observabilité](#observabilite)
 - [Sécurité](#securite)
@@ -262,21 +263,26 @@ Tests: Vitest (helpers d'API et cache).
 
 ## Docker Compose (Postgres)
 
-### Windows
+### Postgres (local via Docker Compose)
 
-```powershell
-Copy-Item .env.example .env
-# Optionnel: setx DB_DSN "postgresql+psycopg://app:app@localhost:5432/app"
-.\PS1\compose_up.ps1
-# API: http://localhost:8001/healthz
+```
+# Up
+bash scripts/bash/compose_up_postgres.sh
+# Smoke API
+bash scripts/bash/smoke_postgres_api.sh
+# CLI dans l image (DB Postgres)
+bash scripts/bash/smoke_postgres_cli.sh
+# Down
+bash scripts/bash/compose_down_postgres.sh
 ```
 
-### Linux/mac
+### CI Postgres
 
-```bash
-cp .env.example .env
-docker compose up -d --build
-curl -sf http://localhost:8001/healthz
+Workflow `.github/workflows/pg_ci.yml` utilise un service `postgres:16-alpine` et lance des tests marques Postgres.
+Localement, vous pouvez lancer:
+
+```
+PG_TEST_DSN=postgresql+psycopg://cc:cc@localhost:5432/ccdb pytest -q -k postgres_integration
 ```
 
 ## PowerShell 7 (pwsh)
@@ -344,6 +350,33 @@ DRYRUN=1 bash scripts/bash/release_tag.sh 1.0.1
 
 * Un tag `vX.Y.Z` declenche `.github/workflows/release.yml`.
 * L'image est publiee sur GHCR: `ghcr.io/<owner>/ccapi:vX.Y.Z`.
+
+## Tests (PowerShell + curl)
+
+```
+# Lints/typing/tests unitaires
+
+python -m ruff check backend
+python -m mypy backend
+pytest -q --cov=backend
+
+# Compose Postgres (Windows)
+
+.\PS1\compose_up_postgres.ps1
+.\PS1\smoke_postgres_api.ps1
+
+# CLI dans conteneur (si host.docker.internal resolu)
+
+.\PS1\smoke_postgres_cli.ps1
+.\PS1\compose_down_postgres.ps1
+
+# Compose Postgres (Bash)
+
+bash scripts/bash/compose_up_postgres.sh
+bash scripts/bash/smoke_postgres_api.sh
+bash scripts/bash/smoke_postgres_cli.sh
+bash scripts/bash/compose_down_postgres.sh
+```
 
 ## Tests et Qualité
 
