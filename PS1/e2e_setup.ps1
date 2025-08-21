@@ -2,19 +2,26 @@ $ErrorActionPreference = "Stop"
 if (-not (Test-Path .\web\package.json)) { Write-Error "Dossier web introuvable" ; exit 1 }
 Push-Location web
 npm ci
+Pop-Location
 
-# 3 tentatives d install du navigateur
+# Chrome systeme ?
+$chrome = & .\PS1\find_chrome.ps1 2>$null
+if ($LASTEXITCODE -eq 0 -and $chrome) {
+  Write-Host "Navigateur systeme detecte: $chrome" -ForegroundColor Cyan
+  $env:PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
+  return
+}
+
+# Install Chromium (3 tentatives)
+Push-Location web
 $ok = $false
 for ($i=1; $i -le 3; $i++) {
-    try {
-        npx playwright install chromium --with-deps
-        $ok = $true
-        break
-    } catch {
-        Write-Warning "Retry playwright install ($i/3)..."
-        Start-Sleep -Seconds 3
-    }
+  try { npx playwright install chromium --with-deps ; $ok = $true ; break } catch {
+    Write-Warning "Retry playwright install chromium ($i/3)..."; Start-Sleep -Seconds 3
+  }
 }
-if (-not $ok) { Write-Error "Echec installation Chromium apres 3 tentatives." ; exit 1 }
 Pop-Location
-Write-Host "Playwright installe." -ForegroundColor Green
+if (-not $ok) {
+  if ($env:CI -eq "true") { Write-Error "Echec install Chromium (CI)" ; exit 1 }
+  else { Write-Warning "Echec install Chromium (local) -> E2E SKIP" ; return }
+}

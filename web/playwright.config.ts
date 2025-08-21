@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const useSystemChrome = !!process.env.CHROMIUM_EXECUTABLE;
+
 export default defineConfig({
   testDir: "e2e",
   timeout: 60_000,
@@ -7,6 +9,9 @@ export default defineConfig({
     baseURL: "http://localhost:5173",
     trace: "on-first-retry",
     headless: true,
+    launchOptions: useSystemChrome
+      ? { executablePath: process.env.CHROMIUM_EXECUTABLE }
+      : {},
   },
   webServer: {
     command: "npm run preview",
