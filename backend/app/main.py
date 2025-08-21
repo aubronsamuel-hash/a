@@ -10,7 +10,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy.exc import IntegrityError
 from starlette.responses import JSONResponse, Response
@@ -25,6 +25,7 @@ from .hash import hash_password
 from .rate_limit import get_limiter
 from .repo_users import create_user, get_by_username
 from .security_headers import SecurityHeadersMiddleware
+from .cors_config import CorsSettings
 from .middleware_features import FeaturesHeaderMiddleware
 from .users_api import router as users_router
 from .routes_features import router as features_router
@@ -107,13 +108,16 @@ def create_app() -> FastAPI:
 
     app = FastAPI(title=settings.APP_NAME)
 
-    if settings.CORS_ORIGINS:
+    # === CORS ===
+    cs = CorsSettings()
+    if cs.enabled:
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=settings.CORS_ORIGINS,
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
+            allow_origins=cs.allow_origins or ["*"],
+            allow_methods=cs.allow_methods,
+            allow_headers=cs.allow_headers,
+            allow_credentials=cs.allow_credentials,
+            max_age=cs.max_age,
         )
 
     app.add_middleware(SecurityHeadersMiddleware)
