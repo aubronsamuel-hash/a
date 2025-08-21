@@ -21,6 +21,7 @@ Monorepo FastAPI (backend) + React Vite (frontend). Windows-first (PowerShell), 
 - [Tests (PowerShell + curl)](#tests-powershell--curl)
 - [Tests et Qualité](#tests-et-qualite)
 - [Observabilité](#observabilite)
+- [Feature Flags](#feature-flags)
 - [Sécurité](#securite)
 - [Dépannage](#depannage)
 - [Roadmap / Étapes livrées](#roadmap--etapes-livrees)
@@ -543,6 +544,22 @@ Scripts:
 powershell -File PS1/health_check.ps1 http://localhost:8001
 # Bash
 bash scripts/bash/health_check.sh http://localhost:8001
+```
+
+## Feature Flags
+
+* Variable d env: `FEATURES_ENABLED="comma,separated,list"`.
+* Features reconnues: `observability, rate-limit, openapi-export, redis-cache, alembic, cli-docker, security-headers, k6-smoke`.
+* Endpoint: `GET /features` -> JSON avec `known`, `enabled`, `raw`.
+* En-tete reponse: `X-Features` liste les features actives.
+
+Affichage rapide:
+
+```
+# Windows
+powershell -File PS1\features.ps1
+# Linux/mac
+bash scripts/bash/features.sh
 ```
 
 ## Sécurité
