@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextvars
 import json
 import logging
+import os
 from datetime import UTC, datetime
 from logging import Formatter, LogRecord, StreamHandler
 from pathlib import Path
@@ -62,6 +63,15 @@ def _setup_logging() -> None:
     root.handlers = [handler]
 
 
+def _reset_db_if_testing() -> None:
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        try:
+            Base.metadata.drop_all(bind=engine)
+        except Exception:
+            pass
+        Base.metadata.create_all(bind=engine)
+
+
 def _auto_seed_admin() -> None:
     if not settings.ADMIN_AUTOSEED:
         return
@@ -89,7 +99,9 @@ MAINT_ALLOW_PATHS = {"/healthz", "/livez", "/readyz", "/metrics"}
 
 def create_app() -> FastAPI:
     _setup_logging()
-    Base.metadata.create_all(bind=engine)
+    _reset_db_if_testing()
+    if not os.getenv("PYTEST_CURRENT_TEST"):
+        Base.metadata.create_all(bind=engine)
     _auto_seed_admin()
 
     app = FastAPI(title=settings.APP_NAME)
