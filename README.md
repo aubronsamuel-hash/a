@@ -386,6 +386,23 @@ bash scripts/bash/compose_down_postgres.sh
 - Lint/Test Web : `npm run lint`, `npm test` dans `web/`
 - Smoke : voir [Scripts utiles](#scripts-utiles)
 
+### Couverture & Warnings (Pytest)
+
+* La couverture reporte maintenant UNIQUEMENT le code applicatif (`backend/app/**`, etc.) grâce à `.coveragerc`.
+* Les fichiers de tests sont exclus du calcul (plus de % bas sur `backend/tests/**`).
+* Les warnings des libs (SQLAlchemy, Pydantic...) sont filtrés via `pytest.ini`.
+  Pour voir tous les warnings:
+
+  ```
+  pytest -W default::Warning -ra
+  ```
+
+  Pour un rapport de couverture détaillé des lignes manquantes:
+
+  ```
+  pytest -q --cov=backend --cov-report=term-missing
+  ```
+
 ## Observabilité
 
 - Header `X-Request-ID` (propagation auto)
