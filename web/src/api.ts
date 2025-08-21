@@ -8,7 +8,6 @@ async function withTimeout<T>(p: Promise<T>, ms = 15000): Promise<T> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   try {
-    // @ts-expect-error abort controller unused
     const res = await p;
     return res as T;
   } finally {
