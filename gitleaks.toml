@@ -2,5 +2,19 @@
 allowlist = [
   "change_me",
   "example.com",
-  "BEGIN AGE PRIVATE KEY"
+  "BEGIN AGE PRIVATE KEY",
+  "JWT_SECRET=change_me",
+  "AGE-SECRET-PLACEHOLDER"
+]
+
+[[rules]]
+description = "Ignore docs/backups/venv"
+regex = '''^$'''
+paths = [
+  "docs/",
+  "site/",
+  "backups/",
+  ".venv/",
+  "logs/",
+  "node_modules/"
 ]

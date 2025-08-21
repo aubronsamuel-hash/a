@@ -1,0 +1,18 @@
+name: cli-docker
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "Dockerfile.cli"
+      - ".github/workflows/cli-docker.yml"
+  push:
+    branches: [ main ]
+jobs:
+  cli-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build CLI image
+        run: docker build -t cli:test -f Dockerfile.cli .
+      - name: Run CLI
+        run: docker run --rm cli:test

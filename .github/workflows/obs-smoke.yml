@@ -1,0 +1,29 @@
+name: obs-smoke
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/obs-smoke.yml"
+jobs:
+  obs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          pip install fastapi uvicorn prometheus-fastapi-instrumentator prometheus-client
+      - name: Start API (metrics enabled)
+        run: |
+          export METRICS_ENABLED=1
+          export METRICS_PATH=/metrics
+          PYTHONPATH=backend nohup python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001 >/dev/null 2>&1 &
+          sleep 2
+      - name: Probe /metrics
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8001/metrics)
+          echo "HTTP=$code"
+          test "$code" = "200"
