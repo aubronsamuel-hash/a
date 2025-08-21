@@ -1,0 +1,42 @@
+name: Load Test (k6)
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "Dockerfile"
+      - "docker-compose.k6.yml"
+      - "load/k6/**"
+      - "scripts/bash/load_k6.sh"
+      - "PS1/load_k6.ps1"
+      - ".github/workflows/k6.yml"
+  workflow_dispatch:
+
+jobs:
+  k6-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Compose up (backend)
+        run: docker compose -f docker-compose.k6.yml up -d --build
+      - name: Wait backend
+        run: |
+          for i in $(seq 1 90); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/healthz || true)
+            [ "$code" = "200" ] && break
+            sleep 2
+          done
+          [ "${code:-0}" = "200" ]
+      - name: Run k6 smoke
+        run: |
+          mkdir -p load/k6
+          docker run --rm --network cc-k6_default -v "$PWD/load/k6:/scripts" -e BASE="http://backend:8001" grafana/k6:latest run --vus 10 --duration 20s --summary-export /scripts/summary.json /scripts/smoke.js
+      - name: Upload k6 summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-summary
+          path: load/k6/summary.json
+      - name: Compose down
+        if: always()
+        run: docker compose -f docker-compose.k6.yml down -v

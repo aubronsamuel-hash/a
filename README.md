@@ -441,6 +441,19 @@ DB_DSN=invalid:///nowhere PYTHONPATH=backend alembic upgrade head || echo "KO at
 ```
 
 
+### Smoke perf (k6)
+
+Lancer un test rapide (10 VUs / 20s):
+
+```
+# Windows
+powershell -File PS1\load_k6.ps1 -VUs 10 -Seconds 20
+# Linux/mac
+bash scripts/bash/load_k6.sh 10 20
+```
+
+Le rapport est ecrit dans `load/k6/summary.json`. En CI, le workflow **Load Test (k6)** uploade cet artefact.
+
 ## Tests et Qualité
 
 - Lint Python : `python -m ruff check backend`
