@@ -6,6 +6,7 @@ from math import ceil
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
+from .audit_log import write_event
 from .deps import get_db, pagination_params, require_admin
 from .hash import hash_password
 from .repo_users import (
@@ -62,12 +63,19 @@ def users_list(
 def users_create(
     body: UserCreateIn,
     db: Session = Depends(get_db),  # noqa: B008
-    _: dict = Depends(require_admin),  # noqa: B008
+    current: dict = Depends(require_admin),  # noqa: B008
 ) -> UserOut:
     if get_by_username(db, body.username):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username deja utilise")
     u = create_user(db, username=body.username, password_hash=hash_password(body.password))
     db.commit()
+    write_event(
+        action="user.create",
+        actor=current["username"],
+        status="success",
+        target=u.username,
+        meta={"role": getattr(u, "role", "user")},
+    )
     return UserOut.model_validate(u)
 
 
@@ -75,7 +83,7 @@ def users_create(
 def users_promote(
     username: str,
     db: Session = Depends(get_db),  # noqa: B008
-    _: dict = Depends(require_admin),  # noqa: B008
+    current: dict = Depends(require_admin),  # noqa: B008
 ) -> UserOut:
     from .repo_users import promote_to_admin  # import tardif pour limiter cycles
 
@@ -83,4 +91,10 @@ def users_promote(
     if not u:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Utilisateur introuvable")
     db.commit()
+    write_event(
+        action="user.promote",
+        actor=current["username"],
+        status="success",
+        target=username,
+    )
     return UserOut.model_validate(u)

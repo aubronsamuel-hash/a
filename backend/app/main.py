@@ -17,6 +17,7 @@ from starlette.responses import JSONResponse, Response
 from starlette.staticfiles import StaticFiles
 
 from .api import router as api_router
+from .audit_api import router as audit_router
 from .auth import router as auth_router
 from .config import settings
 from .db import Base, engine, session_scope
@@ -203,6 +204,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(api_router)
     app.include_router(users_router)
+    app.include_router(audit_router)
 
     Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
