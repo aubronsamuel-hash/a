@@ -1,54 +1,24 @@
-name: Release
+name: release
 on:
   push:
     tags:
-      - "v*"
-  workflow_dispatch:
-
+      - 'v*.*.*'
+permissions:
+  contents: write
 jobs:
-  build-publish:
+  gh-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11", cache: "pip" }
-      - name: Install deps
+      - name: Read version
+        id: v
         run: |
-          python -m pip install --upgrade pip
-          pip install -e backend[dev] build
-      - name: Verify version consistency
-        run: |
-          PYTHONPATH=backend pytest -q -k "version_consistency"
-      - name: Build wheel/sdist
-        run: |
-          cd backend
-          python -m build
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+          echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: ccapi-dist
-          path: backend/dist/*
-      # Optionnel: build docker
-      - name: Docker build
-        uses: docker/setup-buildx-action@v3
-      - name: Build Docker image
-        run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          docker build -t ccapi:latest -t ccapi:${VERSION} .
-      # Push to registry si secrets fournis
-      - name: Docker login (optional)
-        if: ${{ secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN }}
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-      - name: Docker push (optional)
-        if: ${{ secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN }}
-        run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          docker tag ccapi:${VERSION} ${{ secrets.DOCKERHUB_USERNAME }}/ccapi:${VERSION}
-          docker tag ccapi:latest ${{ secrets.DOCKERHUB_USERNAME }}/ccapi:latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/ccapi:${VERSION}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/ccapi:latest
-      - name: Summary
-        run: |
-          echo "Release built for $GITHUB_REF_NAME" >> $GITHUB_STEP_SUMMARY
+          name: Release v${{ steps.v.outputs.version }}
+          tag_name: v${{ steps.v.outputs.version }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
