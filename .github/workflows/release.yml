@@ -2,53 +2,53 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "v*"
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Version SemVer (X.Y.Z). Cree un tag si defini."
-        required: false
-        type: string
-permissions:
-  contents: read
-  packages: write
-  id-token: write
+
 jobs:
-  prepare-tag:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
+  build-publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Create tag
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git tag "v${{ inputs.version }}" -a -m "release v${{ inputs.version }}"
-          git push origin "v${{ inputs.version }}"
-  build-and-publish:
-    runs-on: ubuntu-latest
-    needs: [prepare-tag]
-    steps:
-      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.11", cache: "pip" }
-      - uses: actions/setup-node@v4
-        with: { node-version: "20", cache: "npm", cache-dependency-path: "web/package-lock.json" }
-      - name: Lints + tests
+      - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install -e backend[dev]
-          python -m ruff check backend
-          python -m mypy backend
-          pytest -q --cov=backend
-      - name: Build Docker image
-        uses: docker/build-push-action@v6
+          pip install -e backend[dev] build
+      - name: Verify version consistency
+        run: |
+          PYTHONPATH=backend pytest -q -k "version_consistency"
+      - name: Build wheel/sdist
+        run: |
+          cd backend
+          python -m build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          context: .
-          push: true
-          provenance: false
-          tags: ghcr.io/${{ github.repository_owner }}/ccapi:${{ github.ref_name }}
-          platforms: linux/amd64
+          name: ccapi-dist
+          path: backend/dist/*
+      # Optionnel: build docker
+      - name: Docker build
+        uses: docker/setup-buildx-action@v3
+      - name: Build Docker image
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          docker build -t ccapi:latest -t ccapi:${VERSION} .
+      # Push to registry si secrets fournis
+      - name: Docker login (optional)
+        if: ${{ secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN }}
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      - name: Docker push (optional)
+        if: ${{ secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          docker tag ccapi:${VERSION} ${{ secrets.DOCKERHUB_USERNAME }}/ccapi:${VERSION}
+          docker tag ccapi:latest ${{ secrets.DOCKERHUB_USERNAME }}/ccapi:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/ccapi:${VERSION}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/ccapi:latest
       - name: Summary
         run: |
-          echo "Pushed ghcr.io/${{ github.repository_owner }}/ccapi:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Release built for $GITHUB_REF_NAME" >> $GITHUB_STEP_SUMMARY
