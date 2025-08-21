@@ -37,5 +37,16 @@ class Settings:
     REQUEST_ID_HEADER: str = os.getenv("REQUEST_ID_HEADER", "X-Request-ID")
     LOG_JSON: bool = os.getenv("LOG_JSON", "true").lower() == "true"
 
+    # Rate limiting
+    RATE_LIMIT_ENABLE: bool = os.getenv("RATE_LIMIT_ENABLE", "true").lower() == "true"
+    RATE_LIMIT_GLOBAL_MAX: int = int(os.getenv("RATE_LIMIT_GLOBAL_MAX", "120"))
+    RATE_LIMIT_GLOBAL_WINDOW_SECONDS: int = int(
+        os.getenv("RATE_LIMIT_GLOBAL_WINDOW_SECONDS", "60")
+    )
+    RATE_LIMIT_AUTH_MAX: int = int(os.getenv("RATE_LIMIT_AUTH_MAX", "10"))
+    RATE_LIMIT_AUTH_WINDOW_SECONDS: int = int(
+        os.getenv("RATE_LIMIT_AUTH_WINDOW_SECONDS", "60")
+    )
+
 
 settings = Settings()
