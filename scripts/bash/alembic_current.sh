@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 set -euo pipefail
-alembic upgrade "${1:-head}"
+alembic current

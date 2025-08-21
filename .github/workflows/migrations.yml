@@ -1,0 +1,29 @@
+name: DB Migrations
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "alembic.ini"
+      - "backend/alembic/**"
+      - ".github/workflows/migrations.yml"
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  alembic-sqlite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: "pip" }
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e backend[dev]
+      - name: Alembic upgrade head (SQLite)
+        run: |
+          PYTHONPATH=backend alembic upgrade head
+      - name: Pytests migrations smoke
+        run: |
+          PYTHONPATH=backend pytest -q -k "migrations_smoke"
