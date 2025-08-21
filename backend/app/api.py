@@ -12,8 +12,10 @@ from .config import settings
 from .db import engine
 from .deps import get_current_user, pagination_params
 from .version import version
+from .logging_setup import get_logger
 
 router = APIRouter()
+log = get_logger(__name__)
 
 
 class HealthModel(BaseModel):
@@ -23,6 +25,7 @@ class HealthModel(BaseModel):
 
 @router.get("/healthz", response_model=HealthModel, tags=["health"])
 def healthz() -> HealthModel:
+    log.info("healthz OK")
     return HealthModel(status="ok", version=version)
 
 
