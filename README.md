@@ -154,6 +154,36 @@ bash scripts/bash/docker_smoke.sh
 
 L'image sert l'API (`/healthz`) et le SPA sur `/` (FRONT_DIST_DIR=/app/public).
 
+### CLI Admin (ccadmin)
+
+#### Windows
+
+```
+win\ccadmin.cmd list
+win\ccadmin.cmd create --username alice --password pw
+win\ccadmin.cmd promote --username alice
+win\ccadmin.cmd reset-password --username alice --new-password newpw
+```
+
+Le wrapper tente `pwsh` puis `powershell`. Si aucun n'est présent, installez PowerShell 7:
+
+```powershell
+powershell -File .\PS1\install_pwsh_on_windows.ps1
+```
+
+#### Linux/mac
+
+```
+bash scripts/bash/ccadmin.sh list
+bash scripts/bash/ccadmin.sh create --username bob --password pw
+```
+
+OU via entrypoint Python si installé:
+
+```
+ccadmin list
+```
+
 ## Back-end (FastAPI)
 
 Base URL: `http://localhost:8001`
