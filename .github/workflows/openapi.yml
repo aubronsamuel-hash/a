@@ -1,0 +1,34 @@
+name: OpenAPI Export
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "scripts/bash/export_openapi.sh"
+      - "PS1/export_openapi.ps1"
+      - ".github/workflows/openapi.yml"
+  push:
+    branches: [ main ]
+
+jobs:
+  export-openapi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: "pip" }
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e backend[dev]
+      - name: Run unit tests (OpenAPI)
+        run: |
+          PYTHONPATH=backend pytest -q -k "openapi_export"
+      - name: Export OpenAPI
+        run: |
+          PYTHONPATH=backend bash scripts/bash/export_openapi.sh docs openapi.json
+      - name: Upload openapi.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi
+          path: docs/openapi.json

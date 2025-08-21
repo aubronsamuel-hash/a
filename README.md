@@ -227,6 +227,19 @@ powershell -File PS1/docker_ccadmin.ps1 -Command create -Username alice -Passwor
 powershell -File PS1/docker_ccadmin.ps1 -Command promote -Username alice
 ```
 
+### Export OpenAPI (offline)
+
+Generer `docs/openapi.json` sans demarrer le serveur:
+
+```
+# Windows
+powershell -File PS1/export_openapi.ps1 -OutDir docs -OutFile openapi.json
+# Bash
+bash scripts/bash/export_openapi.sh docs openapi.json
+```
+
+CI `OpenAPI Export` construit et uploade l artefact.
+
 ## Back-end (FastAPI)
 
 Base URL: `http://localhost:8001`
@@ -360,6 +373,7 @@ Jobs :
 - `compose_smoke` (docker compose + healthz)
 - `postgres_tests` (service Postgres, alembic upgrade, tests)
 - `frontend` (npm ci, lint, test, build, smoke ETag cross-OS)
+- `openapi` (export openapi.json et artefact)
 
 ## Releases
 
