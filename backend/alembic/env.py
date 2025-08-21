@@ -14,7 +14,7 @@ BACKEND_DIR = os.path.abspath(os.path.join(THIS_DIR, os.pardir))
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-from app.db import Base  # type: ignore  # pylint: disable=wrong-import-position  # noqa: E402
+from app.db import Base  # pylint: disable=wrong-import-position  # noqa: E402
 
 # Alembic Config
 config = context.config

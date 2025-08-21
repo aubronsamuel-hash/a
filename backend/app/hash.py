@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from passlib.context import CryptContext  # type: ignore[import-untyped]
+from passlib.context import CryptContext
 
 _pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

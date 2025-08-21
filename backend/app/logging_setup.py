@@ -12,6 +12,7 @@ def setup_logging_from_env() -> None:
     level_name = os.getenv("LOG_LEVEL", "INFO").upper()
     level = getattr(logging, level_name, logging.INFO)
     root.setLevel(level)
+    handler: logging.Handler
     if os.getenv("LOG_TO_FILE", "0").lower() in ("1", "true", "yes"):
         path = Path(os.getenv("LOG_FILE_PATH", "logs/app.log"))
         path.parent.mkdir(parents=True, exist_ok=True)
