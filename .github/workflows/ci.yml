@@ -209,7 +209,7 @@ DB_DSN=sqlite:///./cc.db
 
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -237,14 +237,22 @@ DB_DSN=sqlite:///./cc.db
           code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/healthz)
           echo "HTTP=$code"
           test "$code" = "200"
-      - name: Install Playwright
+      - name: Install Playwright Chromium (strict, retries)
+        working-directory: web
         run: |
-          cd web
           npm ci
-          npx playwright install --with-deps
-      - name: E2E tests (Playwright)
+          for i in 1 2 3; do
+            npx playwright install chromium --with-deps && exit 0
+            echo "Retry install Chromium ($i/3)..." >&2
+            sleep 3
+          done
+          echo "Chromium install failed after retries" >&2
+          exit 1
+      - name: E2E tests
+        working-directory: web
         env:
           ADMIN_PASSWORD: "admin123"
+          E2E_SKIP: "0"
         run: |
-          npm --prefix web run build
-          npx playwright test -c web/playwright.config.ts
+          npm run build
+          npx playwright test

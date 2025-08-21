@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 if (process.env.E2E_SKIP === "1") {
-  test.skip(true, "E2E SKIPPED by E2E_SKIP=1");
+  test.skip(true, "E2E SKIP (E2E_SKIP=1)");
 }
 
 const ADMIN_USER = "admin";
