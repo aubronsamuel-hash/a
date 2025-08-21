@@ -60,5 +60,8 @@ class Settings:
     )
     READ_ONLY_MODE: bool = os.getenv("READ_ONLY_MODE", "false").lower() == "true"
 
+    # Audit
+    AUDIT_LOG_PATH: str = os.getenv("AUDIT_LOG_PATH", "audit.jsonl")
+
 
 settings = Settings()

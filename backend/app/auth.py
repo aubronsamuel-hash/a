@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from .audit_log import write_event
 from .config import settings
 from .deps import get_current_user, get_db
 from .hash import hash_password, verify_password
@@ -53,12 +54,26 @@ def login(request: Request, form: LoginIn, db: Session = Depends(get_db)) -> Tok
     _auth_rl_check(ip)
     user = get_by_username(db, form.username)
     if not user or not verify_password(form.password, user.password_hash):
+        write_event(
+            action="auth.login",
+            actor=form.username,
+            status="failure",
+            ip=ip,
+            meta={"reason": "invalid_credentials"},
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Identifiants invalides",
         )
     access = create_access_token(sub=user.username, role=user.role)
     refresh = create_refresh_token(sub=user.username, role=user.role)
+    write_event(
+        action="auth.login",
+        actor=user.username,
+        status="success",
+        ip=ip,
+        meta={"role": user.role},
+    )
     return TokenOut(access_token=access, refresh_token=refresh, token_type="bearer")
 
 
