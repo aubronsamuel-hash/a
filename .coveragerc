@@ -4,6 +4,10 @@ source = backend
 omit =
     backend/tests/*
     */__init__.py
+    # Exclure utilitaires hors perimetre des tests unitaires.
+    backend/tools/*
+    # La CLI est verifiee via jobs Docker; on l'exclut de la couverture unitaire.
+    backend/app/cli.py
 
 [report]
 show_missing = True
