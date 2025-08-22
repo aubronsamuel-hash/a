@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from sqlalchemy import text
 from starlette.responses import JSONResponse
+from typing import cast
 
 from .config import settings
 from .db import engine
@@ -56,8 +57,9 @@ def _redis_ready() -> bool:
         import redis
 
         url = urlparse(settings.REDIS_URL)
+        host = cast(str, url.hostname)
         client = redis.Redis(
-            host=url.hostname, port=url.port or 6379, db=int((url.path or "/0").lstrip("/"))
+            host=host, port=url.port or 6379, db=int((url.path or "/0").lstrip("/"))
         )
         client.ping()
         return True
