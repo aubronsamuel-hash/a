@@ -1,7 +1,17 @@
-FROM python:3.11-slim@sha256:9c6a5b0a5c8e8b8b7c7a76b8f7b3f7a0b3a6b0f0a0f0a0b0b0c0c0c0c0c0c0
+# Image CLI autonome deterministe
+
+# NOTE: tag digest non pinne pour rester simple; on force --pull dans le workflow
+
+FROM python:3.11-slim
 WORKDIR /app
+
+# Genere un script CLI trivial, sans dependances repo
+
 RUN python - <<'PY'
 from pathlib import Path
 Path('/app/cli.py').write_text('print("coulisses-cli: OK")\n', encoding='utf-8')
 PY
+
+# Test rapide possible: docker run cli:test
+
 ENTRYPOINT ["python","/app/cli.py"]
