@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import logging
 import socket
+from typing import cast
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from sqlalchemy import text
 from starlette.responses import JSONResponse
-from typing import cast
 
 from .config import settings
 from .db import engine

@@ -1,9 +1,7 @@
 name: deps-audit
 on:
   pull_request:
-    paths:
-      - "requirements*.txt"
-      - ".github/workflows/deps-audit.yml"
+    paths: [ "requirements*.txt", ".github/workflows/deps-audit.yml" ]
   push:
     branches: [ main ]
 jobs:
@@ -13,11 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+        with: { python-version: "3.11" }
       - name: Install pip-audit
         run: pip install pip-audit==2.7.3
-      - name: Audit runtime deps (requirements.txt) -> SARIF
+      - name: Audit runtime deps -> SARIF
         run: |
           set -e
           if [ -f requirements.txt ]; then
@@ -25,12 +22,10 @@ jobs:
           else
             echo "{}" > pip-audit.sarif
           fi
-          # File de secours si pour une raison quelconque le fichier n'existe pas
           [ -f pip-audit.sarif ] || echo "{}" > pip-audit.sarif
-      - name: Upload SARIF (best-effort)
+      - name: Upload SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: pip-audit.sarif
-      - name: Mark success
+        with: { sarif_file: pip-audit.sarif }
+      - name: Success (non-bloquant sur PR)
         run: echo "deps-audit completed"
