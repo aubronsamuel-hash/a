@@ -1,9 +1,7 @@
 name: image-vuln
 on:
   pull_request:
-    paths:
-      - "Dockerfile*"
-      - ".github/workflows/image-vuln.yml"
+    paths: [ "Dockerfile*", ".github/workflows/image-vuln.yml" ]
   push:
     branches: [ main ]
 jobs:
@@ -12,10 +10,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Build minimal image (example)
+      - name: Build minimal image
         run: |
           echo "FROM python:3.11-slim" > Dockerfile.api.tmp
-          docker build -t app:test -f Dockerfile.api.tmp .
+          docker build --pull -t app:test -f Dockerfile.api.tmp .
       - name: Scan with Trivy (PR: info only)
         if: ${{ github.event_name == 'pull_request' }}
         uses: aquasecurity/trivy-action@0.24.0
