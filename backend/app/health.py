@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
+
 from .db import SessionLocal
 
 router = APIRouter()

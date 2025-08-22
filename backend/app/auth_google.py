@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import RedirectResponse, JSONResponse
+import hashlib
+import hmac
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
-import hmac, hashlib
+
 import jwt  # PyJWT
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from .core.config import get_settings
 

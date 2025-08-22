@@ -3,7 +3,7 @@ from functools import lru_cache
 from typing import List
 
 try:
-    from dotenv import load_dotenv, dotenv_values
+    from dotenv import dotenv_values, load_dotenv
 except Exception:  # pragma: no cover
     load_dotenv = None  # type: ignore[assignment]
     dotenv_values = None  # type: ignore[assignment]

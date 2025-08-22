@@ -4,9 +4,8 @@ import os
 import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # Assurer que 'app' est importable quand alembic est lance depuis la racine
 THIS_DIR = os.path.dirname(__file__)

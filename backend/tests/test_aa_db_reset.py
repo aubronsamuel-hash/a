@@ -1,7 +1,6 @@
-from fastapi.testclient import TestClient
-
 from app.config import settings
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def test_create_app_resets_db():
