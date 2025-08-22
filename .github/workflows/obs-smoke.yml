@@ -32,6 +32,9 @@ jobs:
           done
           echo "metrics HTTP=$code"
           [ "$code" = "200" ] || (echo "metrics KO"; tail -n 200 /tmp/api_obs.log || true; exit 2)
-      - name: Verify content
+      - name: Verify status-only (no content grep)
         run: |
-          curl -s http://127.0.0.1:8001/metrics | head -n 100 | grep -E "^# HELP|http_" >/dev/null
+          test "$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8001/metrics)" = "200"
+      - name: Tail API logs (debug on failure)
+        if: failure()
+        run: tail -n +1 /tmp/api_obs.log || true

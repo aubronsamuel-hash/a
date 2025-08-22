@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from fastapi.testclient import TestClient
-
-from fastapi import FastAPI
-
 from app.features import KNOWN_FEATURES, parse_features
 from app.middleware_features import FeaturesHeaderMiddleware
 from app.routes_features import router as features_router
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 
 def test_parse_features_ok_and_ignore_unknowns():

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import stat
 import pathlib
+import stat
 
 
 def test_sec_scripts_present_and_executable():

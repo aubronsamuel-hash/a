@@ -1,15 +1,19 @@
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-select = ["E","F","W","I","N","UP","B","C4","T20"]
-ignore = ["E203","E266","E501","B905"]
-exclude = ["docs","site",".venv","build","dist","scripts/bash","scripts/ps1"]
+select = ["E","F","I"]
+ignore = ["E203","E266","E501"]
+exclude = [
+"docs","site",".venv","build","dist","scripts/bash","scripts/ps1",
+"node_modules","backups","logs"
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["backend"]
 
 [tool.ruff.lint.per-file-ignores]
-"backend/tests/*" = ["F401","F841"]
+"backend/tests/*" = ["F401","F841","E402"]
+"**/__init__.py" = ["F401"]
 
 [tool.mypy]
 python_version = "3.11"

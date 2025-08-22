@@ -11,8 +11,8 @@ from starlette.responses import JSONResponse
 from .config import settings
 from .db import engine
 from .deps import get_current_user, pagination_params
-from .version import version
 from .logging_setup import get_logger
+from .version import version
 
 router = APIRouter()
 log = get_logger(__name__)

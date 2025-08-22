@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from fastapi.testclient import TestClient
-
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def _preflight(client: TestClient, origin: str, method: str, req_headers: str = "Authorization,Content-Type"):

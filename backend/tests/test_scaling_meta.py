@@ -1,6 +1,7 @@
-from fastapi.testclient import TestClient
-from app.main import create_app
 import os
+
+from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def test_meta_scaling_reads_env(monkeypatch):

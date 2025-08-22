@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from fastapi.testclient import TestClient
-
 from app.main import app
 from app.version import version
+from fastapi.testclient import TestClient
 
 client = TestClient(app)
 

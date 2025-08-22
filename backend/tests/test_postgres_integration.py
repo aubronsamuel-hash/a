@@ -1,12 +1,11 @@
 import os
 
 import pytest
-from fastapi.testclient import TestClient
-
 from app.config import settings
 from app.db import session_scope
 from app.main import create_app
 from app.repo_users import get_by_username
+from fastapi.testclient import TestClient
 
 POSTGRES_DSN_ENV = "PG_TEST_DSN"
 

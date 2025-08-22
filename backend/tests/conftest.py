@@ -4,7 +4,6 @@ import os
 from collections.abc import Iterator
 
 import pytest
-
 from app.config import settings
 
 # Initial toggles before importing app in tests

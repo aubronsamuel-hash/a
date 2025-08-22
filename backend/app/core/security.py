@@ -1,8 +1,8 @@
 from typing import Any, Dict, List
 
 import jwt
-from jwt import InvalidTokenError
 from fastapi import HTTPException, status
+from jwt import InvalidTokenError
 
 
 def decode_jwt(token: str, secret: str, algorithms: List[str]) -> Dict[str, Any]:

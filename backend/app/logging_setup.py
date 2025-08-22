@@ -3,6 +3,7 @@ import logging.handlers
 import os
 from pathlib import Path
 
+
 def setup_logging_from_env() -> None:
     """Configure logging selon variables env.
     LOG_TO_FILE=1 -> RotatingFileHandler, sinon stdout.

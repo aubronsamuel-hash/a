@@ -2,7 +2,7 @@ import os
 import time
 from pathlib import Path
 
-from app.logging_setup import setup_logging_from_env, get_logger
+from app.logging_setup import get_logger, setup_logging_from_env
 
 
 def test_rotation_file_ok(tmp_path, monkeypatch):

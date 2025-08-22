@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from fastapi.testclient import TestClient
-
 from app.config import settings
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def _client() -> TestClient:

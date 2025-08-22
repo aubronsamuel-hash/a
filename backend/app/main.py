@@ -1,37 +1,37 @@
 from __future__ import annotations
 
 import contextvars
+import json
 import logging
 import os
-import json
 from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
-from starlette.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
+from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, Response
 from starlette.staticfiles import StaticFiles
-from .core.config import get_settings as get_core_settings
-from .metrics import setup_metrics
-from .logging_setup import setup_logging_from_env, get_logger
 
 from .api import router as api_router
 from .audit_api import router as audit_router
 from .auth import router as auth_router
 from .auth_google import router as google_router
 from .config import settings
+from .core.config import get_settings as get_core_settings
+from .cors_config import CorsSettings
 from .db import Base, engine, session_scope
-from .health import router as health_router
 from .hash import hash_password
+from .health import router as health_router
+from .logging_setup import get_logger, setup_logging_from_env
+from .metrics import setup_metrics
+from .middleware_features import FeaturesHeaderMiddleware
 from .rate_limit import get_limiter
 from .repo_users import create_user, get_by_username
-from .security_headers import SecurityHeadersMiddleware
-from .cors_config import CorsSettings
-from .middleware_features import FeaturesHeaderMiddleware
-from .users_api import router as users_router
-from .routes_features import router as features_router
 from .routers.protected import router as protected_router
+from .routes_features import router as features_router
+from .security_headers import SecurityHeadersMiddleware
+from .users_api import router as users_router
 
 _request_id_ctx: contextvars.ContextVar[str | None] = contextvars.ContextVar(
     "request_id", default=None
