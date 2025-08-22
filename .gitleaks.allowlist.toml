@@ -1,0 +1,24 @@
+# Allowlist additionnelle pour PR (workspace-only)
+
+[allowlist]
+description = "Allowlist PR workspace placeholders and examples"
+regexes = [
+"JWT_SECRET=change_me",
+"CHANGE_ME",
+"dummy_secret",
+"dummy-token-[0-9a-zA-Z_-]+",
+"AGE-SECRET-PLACEHOLDER",
+"BEGIN AGE PRIVATE KEY",
+"END AGE PRIVATE KEY"
+]
+paths = [
+"docs/.*",
+"README.*",
+".*\\.example$",
+".*\\.enc\\.(ya?ml|json|toml)$",
+"backups/.*",
+"logs/.*",
+"site/.*",
+"node_modules/.*",
+"\\.venv/.*"
+]
