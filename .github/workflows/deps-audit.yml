@@ -9,6 +9,7 @@ on:
 jobs:
   audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -16,8 +17,7 @@ jobs:
           python-version: "3.11"
       - name: Install pip-audit
         run: pip install pip-audit==2.7.3
-      - name: Audit runtime deps (requirements.txt)
-        id: audit
+      - name: Audit runtime deps (requirements.txt) -> SARIF
         run: |
           set -e
           if [ -f requirements.txt ]; then
@@ -30,5 +30,5 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: pip-audit.sarif
-      - name: Success (non-bloquant)
+      - name: Mark success
         run: echo "deps-audit completed"

@@ -14,24 +14,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install API deps (backend or mock)
+      - name: Install deps (backend or mock)
         run: |
           python -m pip install -U pip
-          pip install fastapi uvicorn
-      - name: Start API (prefer backend, fallback to mock) + wait
+          pip install fastapi uvicorn prometheus-client
+      - name: Start API (prefer backend, fallback mock) + wait
         shell: bash
         run: |
           set -euo pipefail
           export PYTHONPATH=backend:.
           # backend prioritaire
-          python - <<'PY'
+          if python - <<'PY'
 import importlib.util,sys
 sys.exit(0 if importlib.util.find_spec('backend.app.main') else 1)
 PY
-          if [ $? -eq 0 ]; then
+          then
             nohup python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 >/tmp/api.log 2>&1 &
           else
-            python -m pip install prometheus-client
             nohup python -m uvicorn scripts.k6.mock_api:app --host 127.0.0.1 --port 8000 >/tmp/api.log 2>&1 &
           fi
           for i in $(seq 1 30); do
@@ -41,7 +40,7 @@ PY
           done
           echo "healthz HTTP=$code"
           [ "$code" = "200" ] || (echo "healthz KO"; tail -n 200 /tmp/api.log || true; exit 2)
-      - name: Run k6 smoke (Grafana action)
+      - name: Run k6 smoke
         uses: grafana/k6-action@v0.3.1
         with:
           filename: scripts/k6/smoke.js
@@ -49,4 +48,4 @@ PY
           BASE_URL: http://127.0.0.1:8000
       - name: Tail API logs (debug on failure)
         if: failure()
-        run: tail -n +1 /tmp/api.log || true
+        run: tail -n +200 /tmp/api.log || true
