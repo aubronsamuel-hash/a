@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "backend/**"
+      - "requirements*.txt"
       - ".github/workflows/obs-smoke.yml"
 jobs:
   obs:
@@ -13,10 +14,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install deps (metrics)
+      - name: Install deps (requirements si dispo, sinon secours)
+        shell: bash
         run: |
+          set -euo pipefail
           python -m pip install -U pip
-          pip install fastapi uvicorn prometheus-client prometheus-fastapi-instrumentator
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install fastapi uvicorn sqlalchemy prometheus-client prometheus-fastapi-instrumentator
+          fi
       - name: Start API with METRICS + wait
         shell: bash
         run: |

@@ -25,6 +25,8 @@ jobs:
           else
             echo "{}" > pip-audit.sarif
           fi
+          # File de secours si pour une raison quelconque le fichier n'existe pas
+          [ -f pip-audit.sarif ] || echo "{}" > pip-audit.sarif
       - name: Upload SARIF (best-effort)
         if: always()
         uses: github/codeql-action/upload-sarif@v3
