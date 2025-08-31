@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://example.github.io/coulisses-crew/</loc>
+         <lastmod>2025-08-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.github.io/coulisses-crew/getting-started/</loc>
+         <lastmod>2025-08-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.github.io/coulisses-crew/adr/0000-template/</loc>
+         <lastmod>2025-08-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.github.io/coulisses-crew/backend/api/</loc>
+         <lastmod>2025-08-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.github.io/coulisses-crew/ci/frontend-storybook/</loc>
+         <lastmod>2025-08-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.github.io/coulisses-crew/ops/monitoring/</loc>
+         <lastmod>2025-08-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+</urlset>
