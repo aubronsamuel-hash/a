@@ -1,12 +1,12 @@
 import os
 from functools import lru_cache
-from typing import List
+from typing import Any, List, cast
 
 try:
     from dotenv import dotenv_values, load_dotenv
 except Exception:  # pragma: no cover
-    load_dotenv = None  # type: ignore[assignment]
-    dotenv_values = None  # type: ignore[assignment]
+    load_dotenv = cast(Any, None)
+    dotenv_values = cast(Any, None)
 
 
 def _split_csv(value: str) -> List[str]:

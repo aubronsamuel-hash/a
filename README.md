@@ -328,6 +328,10 @@ Pages:
 
 Tests: Vitest (helpers d'API et cache).
 
+## CI Frontend
+- Lints, typecheck, tests, build.
+- Storybook: cache npm via `actions/cache` (chemin `~/.npm`) avec clé derivee de `frontend/package-lock.json`. Ne pas utiliser `cache: npm` de `setup-node` en monorepo.
+
 ## Docker Compose (Postgres)
 
 ### Postgres (local via Docker Compose)
