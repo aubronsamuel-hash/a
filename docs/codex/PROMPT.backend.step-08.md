@@ -82,3 +82,5 @@ NOTES
 - Ne pas baisser --cov-fail-under=90.
 - Ne pas modifier d’autres jobs CI hors du backend sauf necessaire.
 - Si une route n’existe pas, le test doit etre tolerant (valider qu’au moins une des routes communes repond).
+
+Ref: docs/roadmap/step-08.md
