@@ -62,6 +62,14 @@ python -m mypy backend
 pytest -q --cov=backend
 ```
 
+### Couverture rapide (Windows)
+
+```powershell
+cd backend
+python -m pip install -r requirements-dev.txt
+pytest --cov=app --cov-report=term-missing --cov-fail-under=90
+```
+
 ## Endpoints
 
 - `GET /healthz`, `GET /livez`, `GET /readyz`, `GET /metrics`
