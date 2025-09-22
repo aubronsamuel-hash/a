@@ -3,6 +3,16 @@ on:
   push:
   pull_request:
 jobs:
+  guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run guards
+        shell: pwsh
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          ./tools/guards/run_all_guards.ps1 --strict
   backend:
     runs-on: ubuntu-latest
     strategy: { matrix: { python-version: ["3.11"] } }
