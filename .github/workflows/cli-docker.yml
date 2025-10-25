@@ -1,18 +1,28 @@
 name: cli-docker
 on:
   pull_request:
-    paths: [ "Dockerfile.cli", ".github/workflows/cli-docker.yml" ]
+    paths:
+      - "Dockerfile.cli"
+      - ".github/workflows/cli-docker.yml"
   push:
-    branches: [ main ]
+    branches: [ "main" ]
 jobs:
   cli-build:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-      - name: Build (pull always)
-        run: docker build --pull -t cli:test -f Dockerfile.cli .
-      - name: Run
-        run: docker run --rm cli:test
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build (force pull, platform amd64)
+        run: |
+          docker buildx build --pull --platform linux/amd64 -t cli:test -f Dockerfile.cli .
+      - name: Run CLI and capture output
+        run: |
+          set -e
+          out=$(docker run --rm cli:test)
+          echo "$out"
+          echo "$out" | grep -q "coulisses-cli: OK"
